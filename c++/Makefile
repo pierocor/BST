@@ -1,36 +1,28 @@
-#Dirs
-EXEDIR=bin
-SRCDIR=src
-HEADDIR=include
-OUTDIR=out
-#Executable
-EXE=bst_bin.x
-MAIN=bst
-HEAD= mod
-#Compiler
-LFLAGS=
-CC=g++
-CFLAGS=-g -std=c++11 -Wall -Wextra -I include 
+EXE = exe.x
+CXX = c++
+CFLAGS = -I include -g -std=c++11 -Wall -Wextra
 
-default: $(EXE)
+SRC= main.cc src/tree.cc
+OBJ=$(SRC:.cc=.o)
+INC = $(wildcard *.h)
 
-$(EXE): ${MAIN}.o ${SRCDIR}/${HEAD}.o
-	$(CC) $^ -o ${EXEDIR}/$(EXE) $(LFLAGS)
-
-${SRCDIR}/${HEAD}.o: ${HEADDIR}/${HEAD}.h
-
-%.o: %.cc
-	$(CC) -c $< -o $@ $(CFLAGS)
+all: $(EXE)
 
 clean:
-	rm -rf ${SRCDIR}/*.o  *.o *~
+	$(info clean up)
+	@rm -rf $(OBJ) $(EXE) src/*~ include/*~ *~ html latex
 
 .PHONY: clean
 
-clean-outputs: 
-	rm -rf ${OUT}/*.dat
+%.o: %.cc
+	$(CXX) -c $< -o $@ $(CFLAGS)
 
-.PHONY: clean-outputs
+$(EXE): $(OBJ)
+	$(CXX) $^ -o $(EXE)
 
-clean-all:
-	rm -rf ${SRCDIR}/*.o ${EXEDIR}/${EXE} ${OUTDIR}/*.dat *~ *.o ${SRCDIR}/*~ ${HEADDIR}/*~
+
+
+main.o: include/tree.h
+
+format: $(SRC) $(INC)
+	@clang-format -i $^ 2>/dev/null || echo "Please install clang-format to run this commands"
