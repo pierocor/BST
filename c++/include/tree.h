@@ -29,7 +29,7 @@ private:
 
   };
   std::unique_ptr<Node> root;
-  /**
+   /**
    * Return a pointer to the (possible) father of a given key.
    */
   //Node * parent(const K & key){
@@ -37,7 +37,7 @@ private:
 
 
 public:
-  Tree() : root{nullptr} {};
+ Tree() : root{nullptr} {};
 
   void insert(const K & key, const T & val, std::unique_ptr<Node> & ptr){
     if ( ptr == nullptr ){
@@ -73,6 +73,57 @@ public:
     // (*root).print();
     naive_print(root);
   }
+
+  // Find minimum in path from root to a given node  
+
+  // Iterator declarations
+  class Iterator;
+  Iterator begin(std::unique_ptr<Node> &ptr){    
+   if (ptr->left==nullptr)
+     return Iterator(ptr);
+   else
+     begin(ptr->left);
+  }
+
+  Iterator end(std::unique_ptr<Node> &ptr){    
+   if (ptr->right==nullptr)
+     return Iterator(ptr);
+   else
+     end(ptr->right);
+  }
+
+  
+  Iterator begin(){    
+    return begin(root);
+  }
+  
+  Iterator end(){    
+    return end(root);
+  }
+
+  /*
+  Iterator find(std::unique_ptr<Node> &target){
+    
+    std::pair<K,V> compare=root->_pair;
+    std::unique_ptr<Node> &tmp;
+    std::unique_ptr<Node> &next;
+    
+    if(compare.first==target->_pair.first){
+      next=root;
+      return next;
+    }else if(compare.first>target->_pair.first){
+      next=
+    }
+    
+  }
+  */
+    
+  /*
+  class ConstIterator;
+  ConstIterator begin();
+  ConstIterator end();
+  */
+  
 };
 
 template < typename K, typename T>
@@ -90,5 +141,63 @@ void Tree<K,T>::Node::print(){
     std::cout << "NONE";
   std::cout << std::endl;
 }
+
+// Iterator definitions
+template <typename K, typename V>
+  class Tree<K,V>::Iterator {
+  using Node = Tree<K,V>::Node;
+  std::unique_ptr<Node> &current;
+
+ public:
+ Iterator(std::unique_ptr<Node> &n) : current{n} {}
+  std::pair<K,V>& operator*() const { return current->_pair; }
+
+  // WORK HERE
+  // ++it
+  /*
+  Iterator& operator++() {
+    std::pair<K,V> target{current->_pair};
+    std::unique_ptr<Node> &tmp{current};
+    
+    K target_k{target.first};
+    
+    if(current->right!=nullptr){
+      //tmp{current->right};
+      //current=Tree<K,V>::begin(&current->right);
+      //return current;
+    }
+    
+    return *this;
+  };
+  */
+  
+  /*
+    if(current->rigth==nullptr){
+      // find minimum in path from root
+      
+    };
+  */
+    
+    /*
+    current = current->next.get();
+    return *this;
+    */
+    
+  /*
+  // it++
+  Iterator operator++(int) {
+    Iterator it{current};
+    ++(*this);
+    return it;
+  }
+
+  bool operator==(const Iterator& other) {
+    return this->current == other.current;
+  }
+  bool operator!=(const Iterator& other) { return !(*this == other); }*/
+};
+
+
+
 
 #endif
