@@ -12,7 +12,7 @@ int main(){
   BT.naive_print();
 
   Tree<int,int>::Iterator beginning=BT.begin();
-  Tree<int,int>::Iterator ending=BT.end();
+  Tree<int,int>::Iterator ending=BT.last();
 
   std::cout << std::endl;
   std::cout << "The begin has key " << (*beginning).first  << std::endl;
