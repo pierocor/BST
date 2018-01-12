@@ -3,6 +3,7 @@
 #include<utility>
 #include<memory>
 #include<iostream>
+#include <sstream>
 /**
  * Class for binary trees.
  */
@@ -45,8 +46,8 @@ public:
     else
       return begin((ptr->left).get());
   }
-  
-  Iterator last(Node *ptr){    
+
+  Iterator last(Node *ptr){
    if (ptr->right==nullptr)
      return Iterator(ptr);
    else
@@ -56,11 +57,11 @@ public:
   Iterator last(){
     return last(root.get());
   }
-  
-  Iterator begin(){    
+
+  Iterator begin(){
     return begin(root.get());
   }
-  
+
   Iterator end(){
     return Iterator{nullptr};
   }
@@ -73,7 +74,7 @@ public:
     }
     if( ptr->_pair.first > key ){
       parent=ptr.get();
-      return insert(key, val, ptr->left,parent);      
+      return insert(key, val, ptr->left,parent);
     }
     if( ptr->_pair.first < key ){
       parent=ptr->godfather;
@@ -94,31 +95,51 @@ public:
   void last_node(Iterator tmp);
 
   void naive_print(std::unique_ptr<Node> & ptr);
-  void naive_print(){ naive_print(root); }   
+  void naive_print(){ naive_print(root); }
 
   /*
   Iterator find(std::unique_ptr<Node> &target){
-    
+
     std::pair<K,V> compare=root->_pair;
     std::unique_ptr<Node> &tmp;
     std::unique_ptr<Node> &next;
-    
+
     if(compare.first==target->_pair.first){
       next=root;
       return next;
     }else if(compare.first>target->_pair.first){
       next=
     }
-    
+
   }
   */
-    
-  /*
-  class ConstIterator;
-  ConstIterator begin();
-  ConstIterator end();
-  */
-  
+
+
+  void graph_print(std::unique_ptr<Node> & ptr, std::ostringstream & os){
+    std::cout << ptr->_pair.first;
+    if (ptr->right != nullptr ){
+      std::cout << " ---- ";
+      std::ostringstream tmp;
+      tmp << os.str();
+      if (ptr->left != nullptr )
+        tmp << "|";
+      tmp << "\t";
+      graph_print(ptr->right, tmp);
+    }
+    if (ptr->left != nullptr ){
+      std::cout << std::endl << os.str() << "|";
+      std::cout << std::endl << os.str();
+      graph_print(ptr->left, os);
+    }
+  }
+
+  void graph_print(){
+    std::cout << "\n*";
+    std::ostringstream os{};
+    graph_print(root, os);
+    std::cout << "\n";
+  }
+
 };
 
 template < typename K, typename T>
@@ -150,11 +171,11 @@ template <typename K, typename V>
  public:
  Iterator(std::unique_ptr<Node> &n) : current{n.get()} {}
  Iterator(Node *n): current{n} {}
-  
+
   std::pair<K,V>& operator*() const { return current->_pair; }
-  
+
   Node *get(){ return current; }
-  
+
   Iterator get_godfather(){ return Iterator(current->godfather); }
 
   // return minimum on right branch
@@ -184,7 +205,7 @@ template <typename K, typename V>
 
   // WORK HERE
   // ++it
-  
+
   Iterator& operator++() {
     /*
     if(this->islast()){
@@ -200,19 +221,19 @@ template <typename K, typename V>
       }
       // }
   };
-  
+
   /*
     if(current->rigth==nullptr){
       // find minimum in path from root
-      
+
     };
   */
-    
+
     /*
     current = current->next.get();
     return *this;
     */
-    
+
   /*
   // it++
   Iterator operator++(int) {
@@ -239,7 +260,7 @@ template < typename K, typename T>
   if(parent==nullptr)
     std::cout << "Godfather: nullptr" << std::endl;
   else
-    std::cout << "Godfather: " << parent->_pair.first << "," << parent->_pair.second << std::endl;  
+    std::cout << "Godfather: " << parent->_pair.first << "," << parent->_pair.second << std::endl;
 }
 
 template < typename K, typename T>
