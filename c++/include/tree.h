@@ -3,7 +3,8 @@
 #include<utility>
 #include<memory>
 #include<iostream>
-#include <sstream>
+#include <string>
+#include <iostream>
 /**
  * Class for binary trees.
  */
@@ -114,29 +115,32 @@ public:
   }
   */
 
-
-  void graph_print(std::unique_ptr<Node> & ptr, std::ostringstream & os){
-    std::cout << ptr->_pair.first;
+  // PBM.PC - working till 8 digits!!
+  void graph_print(std::unique_ptr<Node> & ptr, std::string & s){
     if (ptr->right != nullptr ){
-      std::cout << " ---- ";
-      std::ostringstream tmp;
-      tmp << os.str();
+      std::cout.fill('-');
+      std::cout.width(8);
+    }
+    std::cout << std::left << ptr->_pair.first;
+    if (ptr->right != nullptr ){
+      // std::cout << " ---- ";
+      std::string tmp{s};
       if (ptr->left != nullptr )
-        tmp << "|";
-      tmp << "\t";
+        tmp += "|";
+      tmp += "\t";
       graph_print(ptr->right, tmp);
     }
     if (ptr->left != nullptr ){
-      std::cout << std::endl << os.str() << "|";
-      std::cout << std::endl << os.str();
-      graph_print(ptr->left, os);
+      std::cout << std::endl << s << "|";
+      std::cout << std::endl << s;
+      graph_print(ptr->left, s);
     }
   }
 
   void graph_print(){
-    std::cout << "\n*";
-    std::ostringstream os{};
-    graph_print(root, os);
+    std::cout << "\n*\n";
+    std::string s;
+    graph_print(root, s);
     std::cout << "\n";
   }
 

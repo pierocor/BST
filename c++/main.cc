@@ -9,7 +9,7 @@ int main(){
   Tree<int, int> BT{};
   srand (SEED);
   for ( int i = 0; i < 100; ++i ){
-    BT.insert( rand()%100, rand()%100 );
+    BT.insert( rand()%100000, rand()%100 );
   }
 
   BT.graph_print();
