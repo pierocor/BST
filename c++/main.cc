@@ -3,6 +3,7 @@
 
 int main(){
   Tree<int, int> BT{};
+
   BT.insert(4,7);
   BT.insert(8,-2);
   BT.insert(5,1);
@@ -11,15 +12,22 @@ int main(){
   BT.insert(7,4);
   BT.naive_print();
 
-  Tree<int,int>::Iterator beginning=BT.begin();
-  Tree<int,int>::Iterator ending=BT.last();
+  Tree<int,int>::Node prova;
 
-  std::cout << std::endl;
-  std::cout << "The begin has key " << (*beginning).first  << std::endl;
-  std::cout << "The end has key " << (*ending).first  << std::endl;
+  /*
+  Tree<int,int>::Iterator beginning{BT.begin()};
+  std::cout << "Beginning: " << (*beginning).first << " " << (*beginning).second << std::endl;
 
-  //Tree<int,int>::Iterator second=++beginning;
-  //std::cout << "The second element has key" << (*second).first << std::endl;
+  Tree<int,int>::Iterator beginning2{++beginning};
+  Tree<int,int>::Iterator beginning3{++beginning2};
+  */
+  //Tree<int,int>::Iterator beginning4{++beginning3};
+ 
+  //std::cout << "Beginning++: " << (*beginning2).first << " " << (*beginning2).second << std::endl;
+    //  std::cout << "Beginning++: " << (*beginning3).first << " " << (*beginning3).second << std::endl;
+  
+
+  
   
   return 0;
 }

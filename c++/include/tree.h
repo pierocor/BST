@@ -33,62 +33,9 @@ private:
    /**
    * Return a pointer to the (possible) father of a given key.
    */
-  //Node * parent(const K & key){
-    // PBM: to be implemented
-
 
 public:
  Tree() : root{nullptr} {};
-
-  void insert(const K & key, const T & val, std::unique_ptr<Node> & ptr){
-    bool root_status=true,left_parent=false,rigth_parent=false;
-    Node *parent{ptr->godfather};
-    if (ptr == nullptr ){
-      std::cout << key << " IN!\n";
-      if(root_status)
-	ptr.reset(new Node(key, val));
-      else
-	ptr.reset(new Node(key,val,parent));
-      return;
-    }
-    if( ptr->_pair.first > key ){
-      root_status=false;
-      left_parent=true;
-      rigth_parent=false;
-      std::cout << key << " less than " << ptr->_pair.first << "\n";
-      insert(key, val, ptr->left);
-    }
-    if( ptr->_pair.first < key ){
-      root_status=false;
-      rigth_parent=true;
-      left_parent=false;
-      std::cout << key << " greather than "<< ptr->_pair.first << "\n";
-      insert(key, val, ptr->right);
-    }
-    if( ptr->_pair.first == key ){
-      root_status=false;
-      ptr->_pair.second = val;  // PBM: up to us
-    }
-  }
-
-  void insert(const K & key, const T & val){
-    insert(key, val, root);
-  }
-
-  void naive_print(std::unique_ptr<Node> & ptr){
-    if (ptr->left != nullptr )
-      naive_print(ptr->left);
-    if (ptr->right != nullptr )
-      naive_print(ptr->right);
-    (*ptr).print();
-  }
-
-  void naive_print(){
-    // (*root).print();
-    naive_print(root);
-  }
-
-  // Find minimum in path from root to a given node  
 
   // Iterator declarations
   class Iterator;
@@ -117,6 +64,36 @@ public:
   Iterator end(){
     return Iterator{nullptr};
   }
+
+  Iterator insert(const K & key, const T & val, std::unique_ptr<Node> & ptr, Node *parent){
+
+    if (ptr == nullptr ){
+      ptr.reset(new Node(key, val,nullptr,nullptr,parent));
+      return Iterator(ptr);
+    }
+    if( ptr->_pair.first > key ){
+      parent=ptr.get();
+      return insert(key, val, ptr->left,parent);      
+    }
+    if( ptr->_pair.first < key ){
+      parent=ptr->godfather;
+      return insert(key, val, ptr->right,parent);
+    }
+    if( ptr->_pair.first == key ){
+      ptr->_pair.second = val;  // PBM: up to us
+    }
+    
+  }
+
+  Iterator insert(const K & key, const T & val){
+    return insert(key, val, root, nullptr);
+  }
+
+  // PBM: just for debug. I want to see the properties of the last added node. Cannot acces directly from main, so defin this auxiliary.
+  void last_node(Iterator tmp);
+
+  void naive_print(std::unique_ptr<Node> & ptr);
+  void naive_print(){ naive_print(root); }   
 
   /*
   Iterator find(std::unique_ptr<Node> &target){
@@ -156,39 +133,72 @@ void Tree<K,T>::Node::print(){
     std::cout << right->_pair.first;
   else
     std::cout << "NONE";
-  std::cout << std::endl;
+  if(godfather==nullptr)
+    std::cout << "\t GP: nullptr" << std::endl;
+  else
+    std::cout << "\t GP: key " << (*godfather)._pair.first << std::endl;
+
 }
 
 // Iterator definitions
 template <typename K, typename V>
   class Tree<K,V>::Iterator {
   using Node = Tree<K,V>::Node;
-  //std::unique_ptr<Node> &current;
   Node *current;
 
  public:
-  //Iterator(std::unique_ptr<Node> &n) : current{n} {}
+ Iterator(std::unique_ptr<Node> &n) : current{n.get()} {}
  Iterator(Node *n): current{n} {}
+  
   std::pair<K,V>& operator*() const { return current->_pair; }
+  
+  Node *get(){ return current; }
+  
+  Iterator get_godfather(){ return Iterator(current->godfather); }
+
+  // return minimum on right branch
+  Iterator rmin(){
+    if(current->right!=nullptr){
+      Node *tmp{(current->right).get()};
+      if(tmp->left==nullptr){
+	return Iterator(tmp);
+      }
+      else{
+	current=(current->left).get();
+	return this->rmin();
+      }
+    }else{
+      return Iterator(nullptr);
+    }
+  }
+
+  // returns true is argument is a node with left/right/godfather all nullptr
+  bool islast(){
+    Node *tmp=this->get();
+    if(tmp->right==nullptr&&tmp->godfather==nullptr)
+      return true;
+    else
+      return false;
+  }
 
   // WORK HERE
   // ++it
-  /*
+  
   Iterator& operator++() {
-    std::pair<K,V> target{current->_pair};
-    std::unique_ptr<Node> &tmp{current};
-    
-    K target_k{target.first};
-    
-    if(current->right!=nullptr){
-      //tmp{current->right};
-      //current=Tree<K,V>::begin(&current->right);
-      //return current;
-    }
-    
-    return *this;
+    /*
+    if(this->islast()){
+      std::cout << "Out of bounds" << std::endl;
+      return Iterator(nullptr); // retrun end()
+      }else{*/
+      if(current->right!=nullptr){
+	current=(this->rmin()).get();
+	return *this;
+      }else{
+	current=(this->get_godfather()).get();
+	return *this;
+      }
+      // }
   };
-  */
   
   /*
     if(current->rigth==nullptr){
@@ -216,7 +226,28 @@ template <typename K, typename V>
   bool operator!=(const Iterator& other) { return !(*this == other); }*/
 };
 
+/* Extra stuff */
+template < typename K, typename T>
+  void Tree<K,T>::last_node(Tree::Iterator tmp){
+  Node *parent;
+  std::pair<K,T> tmp_pair{*tmp};
+  std::cout << "Last added note properties" << std::endl;
+  std::cout << "Key: " << tmp_pair.first << std::endl;
+  std::cout << "Value: " << tmp_pair.second << std::endl;
+  parent=(tmp.get_godfather()).get();
+  if(parent==nullptr)
+    std::cout << "Godfather: nullptr" << std::endl;
+  else
+    std::cout << "Godfather: " << parent->_pair.first << "," << parent->_pair.second << std::endl;  
+}
 
-
+template < typename K, typename T>
+  void Tree<K,T>::naive_print(std::unique_ptr<Node> & ptr){
+  if (ptr->left != nullptr )
+    naive_print(ptr->left);
+  if (ptr->right != nullptr )
+    naive_print(ptr->right);
+  (*ptr).print();
+}
 
 #endif
