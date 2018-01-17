@@ -41,6 +41,8 @@ public:
 
   // Iterator declarations
   class Iterator;
+  ///////////////////// PBM: ConstIterator ? /////////////////////
+  // class ConstIterator;
   Iterator begin(Node *ptr){
     if(ptr->left==nullptr)
       return Iterator{ptr};
@@ -83,6 +85,7 @@ public:
     }
     if( ptr->_pair.first == key ){
       ptr->_pair.second = val;  // PBM: up to us
+      return Iterator(ptr);
     }
 
     return Iterator(nullptr);
@@ -176,27 +179,11 @@ template <typename K, typename V>
  Iterator(std::unique_ptr<Node> &n) : current{n.get()} {}
  Iterator(Node *n): current{n} {}
 
-  std::pair<K,V>& operator*() const { return current->_pair; }
+  K& operator*() const { return (current->_pair).first; }
 
   Node *get(){ return current; }
 
   Iterator get_godfather(){ return Iterator(current->godfather); }
-
-  // return minimum on right branch
-  Iterator rmin(){
-    if(current->right!=nullptr){
-      Node *tmp{(current->right).get()};
-      if(tmp->left==nullptr){
-	return Iterator(tmp);
-      }
-      else{
-	current=(current->left).get();
-	return this->rmin();
-      }
-    }else{
-      return Iterator(nullptr);
-    }
-  }
 
   // returns true is argument is a node with left/right/godfather all nullptr
   bool islast(){
@@ -211,21 +198,26 @@ template <typename K, typename V>
   // ++it
 
   Iterator& operator++() {
-    /*
-    if(this->islast()){
-      std::cout << "Out of bounds" << std::endl;
-      return Iterator(nullptr); // retrun end()
-      }else{*/
-      if(current->right!=nullptr){
-	current=(this->rmin()).get();
-	return *this;
-      }else{
-	current=(this->get_godfather()).get();
-	return *this;
-      }
-      // }
+    if(current->right != nullptr){
+      current = (current->right).get();
+      while ( (current->left).get() != nullptr )
+        current = (current->left).get();
+	    return *this;
+    }else{
+	    current=(this->get_godfather()).get();
+	    return *this;
+    }
   };
 
+  Iterator operator++(int) {
+    Iterator it{current};
+    ++(*this);
+    return it;
+  }
+  bool operator==(const Iterator& other) {
+    return this->current == other.current;
+  }
+  bool operator!=(const Iterator& other) { return !(*this == other); }
   /*
     if(current->rigth==nullptr){
       // find minimum in path from root
@@ -251,6 +243,16 @@ template <typename K, typename V>
   }
   bool operator!=(const Iterator& other) { return !(*this == other); }*/
 };
+// /////////////////// PBM: ConstIterator ? /////////////////////
+// template < typename K, typename V>
+// class Tree<K,V>::ConstIterator : public Tree<K,V>::Iterator {
+//   using parent = Tree<K,V>::Iterator;
+//
+//  public:
+//   using parent::Iterator;
+//   const V& operator*() const { return parent::operator*(); }
+// };
+// /////////////////// PBM: ConstIterator ? /////////////////////
 
 /* Extra stuff */
 template < typename K, typename T>
