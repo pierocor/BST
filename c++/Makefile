@@ -1,5 +1,5 @@
 EXE = exe.x
-CXX = c++
+CXX = g++
 CFLAGS = -I include -g -std=c++11 -Wall -Wextra
 
 SRC= main.cc src/tree.cc
