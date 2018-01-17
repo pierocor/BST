@@ -1,34 +1,32 @@
 #include<iostream>
 #include<tree.h>
+#ifndef SEED
+#include <time.h>
+#define SEED time(NULL)
+#endif
 
 int main(){
   Tree<int, int> BT{};
+  srand (SEED);
+  BT.insert( 5, -1);
+  for ( int i = 0; i < 10; ++i ){
+    BT.insert( rand()%10, rand()%100 );
+  }
+  Tree<int, int>::Iterator tmp{BT.insert( 5, -1)};
+  BT.graph_print();
+  std::cout << std::endl << " ++node(5): " << *(++tmp) << std::endl;
+  std::cout << std::endl << " node(5)++: " << *(tmp++) << std::endl;
 
-  BT.insert(4,7);
-  BT.insert(8,-2);
-  BT.insert(5,1);
-  BT.insert(3,4);
-  BT.insert(6,1);
-  BT.insert(7,4);
-  BT.naive_print();
+  for (Tree<int, int>::Iterator it = BT.begin(); it != BT.end(); ++it) {
+   std::cout << *it << " ";
+}
+  std::cout << std::endl;
 
-  //Tree<int,int>::Node prova;
+  for (auto& it : BT) {
+    std::cout << it << " ";
+  }
+  std::cout << std::endl;
 
-  
-  Tree<int,int>::Iterator beginning{BT.begin()};
-  std::cout << "Beginning: " << (*beginning).first << " " << (*beginning).second << std::endl;
-  
-  Tree<int,int>::Iterator beginning2{++beginning};
-  
-  Tree<int,int>::Iterator beginning3{++beginning2};
-  
-  //Tree<int,int>::Iterator beginning4{++beginning3};
- 
-  std::cout << "Beginning++: " << (*beginning2).first << " " << (*beginning2).second << std::endl;
-    //  std::cout << "Beginning++: " << (*beginning3).first << " " << (*beginning3).second << std::endl;
-  
-
-  
-  
+  // BT.naive_print();
   return 0;
 }

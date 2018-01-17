@@ -3,6 +3,8 @@
 #include<utility>
 #include<memory>
 #include<iostream>
+#include <string>
+#include <iostream>
 /**
  * Class for binary trees.
  */
@@ -39,14 +41,16 @@ public:
 
   // Iterator declarations
   class Iterator;
+  ///////////////////// PBM: ConstIterator ? /////////////////////
+  // class ConstIterator;
   Iterator begin(Node *ptr){
     if(ptr->left==nullptr)
       return Iterator{ptr};
     else
       return begin((ptr->left).get());
   }
-  
-  Iterator last(Node *ptr){    
+
+  Iterator last(Node *ptr){
    if (ptr->right==nullptr)
      return Iterator(ptr);
    else
@@ -56,11 +60,11 @@ public:
   Iterator last(){
     return last(root.get());
   }
-  
-  Iterator begin(){    
+
+  Iterator begin(){
     return begin(root.get());
   }
-  
+
   Iterator end(){
     return Iterator{nullptr};
   }
@@ -73,7 +77,7 @@ public:
     }
     if( ptr->_pair.first > key ){
       parent=ptr.get();
-      return insert(key, val, ptr->left,parent);      
+      return insert(key, val, ptr->left,parent);
     }
     if( ptr->_pair.first < key ){
       parent=ptr->godfather;
@@ -81,6 +85,7 @@ public:
     }
     if( ptr->_pair.first == key ){
       ptr->_pair.second = val;  // PBM: up to us
+      return Iterator(ptr);
     }
 
     return Iterator(nullptr);
@@ -94,31 +99,54 @@ public:
   void last_node(Iterator tmp);
 
   void naive_print(std::unique_ptr<Node> & ptr);
-  void naive_print(){ naive_print(root); }   
+  void naive_print(){ naive_print(root); }
 
   /*
   Iterator find(std::unique_ptr<Node> &target){
-    
+
     std::pair<K,V> compare=root->_pair;
     std::unique_ptr<Node> &tmp;
     std::unique_ptr<Node> &next;
-    
+
     if(compare.first==target->_pair.first){
       next=root;
       return next;
     }else if(compare.first>target->_pair.first){
       next=
     }
-    
+
   }
   */
-    
-  /*
-  class ConstIterator;
-  ConstIterator begin();
-  ConstIterator end();
-  */
-  
+
+  // PBM.PC - working till 8 digits!!
+  void graph_print(std::unique_ptr<Node> & ptr, std::string & s){
+    if (ptr->right != nullptr ){
+      std::cout.fill('-');
+      std::cout.width(8);
+    }
+    std::cout << std::left << ptr->_pair.first;
+    if (ptr->right != nullptr ){
+      // std::cout << " ---- ";
+      std::string tmp{s};
+      if (ptr->left != nullptr )
+        tmp += "|";
+      tmp += "\t";
+      graph_print(ptr->right, tmp);
+    }
+    if (ptr->left != nullptr ){
+      std::cout << std::endl << s << "|";
+      std::cout << std::endl << s;
+      graph_print(ptr->left, s);
+    }
+  }
+
+  void graph_print(){
+    std::cout << "\n*\n";
+    std::string s;
+    graph_print(root, s);
+    std::cout << "\n";
+  }
+
 };
 
 template < typename K, typename T>
@@ -150,28 +178,12 @@ template <typename K, typename V>
  public:
  Iterator(std::unique_ptr<Node> &n) : current{n.get()} {}
  Iterator(Node *n): current{n} {}
-  
-  std::pair<K,V>& operator*() const { return current->_pair; }
-  
-  Node *get(){ return current; }
-  
-  Iterator get_godfather(){ return Iterator(current->godfather); }
 
-  // return minimum on right branch
-  Iterator rmin(){
-    if(current->right!=nullptr){
-      Node *tmp{(current->right).get()};
-      if(tmp->left==nullptr){
-	return Iterator(tmp);
-      }
-      else{
-	current=(current->left).get();
-	return this->rmin();
-      }
-    }else{
-      return Iterator(nullptr);
-    }
-  }
+  K& operator*() const { return (current->_pair).first; }
+
+  Node *get(){ return current; }
+
+  Iterator get_godfather(){ return Iterator(current->godfather); }
 
   // returns true is argument is a node with left/right/godfather all nullptr
   bool islast(){
@@ -184,35 +196,40 @@ template <typename K, typename V>
 
   // WORK HERE
   // ++it
-  
+
   Iterator& operator++() {
-    /*
-    if(this->islast()){
-      std::cout << "Out of bounds" << std::endl;
-      return Iterator(nullptr); // retrun end()
-      }else{*/
-      if(current->right!=nullptr){
-	current=(this->rmin()).get();
-	return *this;
-      }else{
-	current=(this->get_godfather()).get();
-	return *this;
-      }
-      // }
+    if(current->right != nullptr){
+      current = (current->right).get();
+      while ( (current->left).get() != nullptr )
+        current = (current->left).get();
+	    return *this;
+    }else{
+	    current=(this->get_godfather()).get();
+	    return *this;
+    }
   };
-  
+
+  Iterator operator++(int) {
+    Iterator it{current};
+    ++(*this);
+    return it;
+  }
+  bool operator==(const Iterator& other) {
+    return this->current == other.current;
+  }
+  bool operator!=(const Iterator& other) { return !(*this == other); }
   /*
     if(current->rigth==nullptr){
       // find minimum in path from root
-      
+
     };
   */
-    
+
     /*
     current = current->next.get();
     return *this;
     */
-    
+
   /*
   // it++
   Iterator operator++(int) {
@@ -226,6 +243,16 @@ template <typename K, typename V>
   }
   bool operator!=(const Iterator& other) { return !(*this == other); }*/
 };
+// /////////////////// PBM: ConstIterator ? /////////////////////
+// template < typename K, typename V>
+// class Tree<K,V>::ConstIterator : public Tree<K,V>::Iterator {
+//   using parent = Tree<K,V>::Iterator;
+//
+//  public:
+//   using parent::Iterator;
+//   const V& operator*() const { return parent::operator*(); }
+// };
+// /////////////////// PBM: ConstIterator ? /////////////////////
 
 /* Extra stuff */
 template < typename K, typename T>
@@ -239,7 +266,7 @@ template < typename K, typename T>
   if(parent==nullptr)
     std::cout << "Godfather: nullptr" << std::endl;
   else
-    std::cout << "Godfather: " << parent->_pair.first << "," << parent->_pair.second << std::endl;  
+    std::cout << "Godfather: " << parent->_pair.first << "," << parent->_pair.second << std::endl;
 }
 
 template < typename K, typename T>
