@@ -43,14 +43,14 @@ public:
     if(ptr->left==nullptr)
       return Iterator{ptr};
     else
-      begin((ptr->left).get());
+      return begin((ptr->left).get());
   }
   
   Iterator last(Node *ptr){    
    if (ptr->right==nullptr)
      return Iterator(ptr);
    else
-     last((ptr->right).get());
+     return last((ptr->right).get());
   }
 
   Iterator last(){
@@ -82,7 +82,8 @@ public:
     if( ptr->_pair.first == key ){
       ptr->_pair.second = val;  // PBM: up to us
     }
-    
+
+    return Iterator(nullptr);
   }
 
   Iterator insert(const K & key, const T & val){
