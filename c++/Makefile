@@ -26,3 +26,6 @@ main.o: include/tree.h
 
 format: $(SRC) $(INC)
 	@clang-format -i $^ 2>/dev/null || echo "Please install clang-format to run this commands"
+
+documentation: doc/doxy.in
+	doxygen $^

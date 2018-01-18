@@ -2,3 +2,5 @@
 *.o
 .gitignore
 Makefile
+c++/html/*
+c++/latex/*
