@@ -8,21 +8,21 @@
 /**
  * Class for binary trees.
  */
-template < typename K, typename T>
+template < typename K, typename V>
 class Tree{
 private:
   class Node {
   public:
-    std::pair<K,T> _pair;
+    std::pair<K,V> _pair;
     std::unique_ptr<Node> left;
     std::unique_ptr<Node> right;
     Node *godfather;
-
+    
     /**
      * Node Constructor. Takes \p key for the key and \p val for the
      * value. Optionally the children and the godfather (i.e. the first "left" ancestor) can be specified.
      */
-  Node(const K & key, const T & val, Node * l = nullptr, Node * r = nullptr, Node * g = nullptr) :
+  Node(const K & key, const V & val, Node * l = nullptr, Node * r = nullptr, Node * g = nullptr) :
     _pair{key, val}, left{l}, right{r}, godfather{g} {};
     // PBM: What if l or r are already assigned to other unique_ptrs?
     /**
@@ -30,21 +30,36 @@ private:
      */
     void print();
 
+    // PBM: this functions are useful to linearize and balancing the tree 
+    /**
+     * Sets the right pointer to a new value. 
+     */
+    void setr(std::unique_ptr<Node> &newptr){
+      right=newptr;
+    }
+    /**
+     * Sets the left pointer to a new value. 
+     */
+    void setl(std::unique_ptr<Node> &newptr){
+      left=newptr;
+    }
   };
   std::unique_ptr<Node> root;
+  size_t _len;
 
 public:
- Tree() : root{nullptr} {};
+ Tree() : root{nullptr}, _len{0} {};
 
   class Iterator;
   class ConstIterator;
+
   /* PRIVATE OVERLOAD SECTION *********************************************************************************************************************************************************************************/
   // PBM: this private section is ONLY for overloaded function. Luca would not like the user to use the functions with more paremeters then needed, as the tree should use it privately.
  private:
   /**
    * Returns iterator to the begin of the left sub-tree of the node pointed by \p ptr.
    */
-  Iterator begin(Node *ptr){
+  Iterator begin(Node *ptr) const {
     if(ptr->left==nullptr)
       return Iterator{ptr};
     else
@@ -53,7 +68,7 @@ public:
    /**
    * Returns iterator to the last (non-null) element of the right sub-tree of the node pointed by \p ptr.
    */
-  Iterator last(Node *ptr){
+  Iterator last(Node *ptr) const {
    if (ptr->right==nullptr)
      return Iterator(ptr);
    else
@@ -63,10 +78,11 @@ public:
     /**
    * Adds iteratively a new node to the tree, defined by the values \p key and \p val. The insertion starts comparing the key from the node pointed by \p ptr and automatically updates the godfather of the new node in the variable \p parent. Returns an iterator (i.e. generalized pointer) to the newly added node.
    */
-  Iterator insert(const K & key, const T & val, std::unique_ptr<Node> & ptr, Node *parent){
+  Iterator insert(const K & key, const V & val, std::unique_ptr<Node> & ptr, Node *parent){
 
     if (ptr == nullptr ){
       ptr.reset(new Node(key, val,nullptr,nullptr,parent));
+      ++_len;
       return Iterator(ptr);
     }
     if( ptr->_pair.first > key ){
@@ -93,14 +109,13 @@ public:
   /**
    * Prints the tree as a graph.
    */
-  void graph_print(std::unique_ptr<Node> & ptr, std::string & s){
+  void graph_print(std::unique_ptr<Node> & ptr, std::string & s) {
     if (ptr->right != nullptr ){
       std::cout.fill('-');
       std::cout.width(8);
     }
     std::cout << std::left << ptr->_pair.first;
     if (ptr->right != nullptr ){
-      // std::cout << " ---- ";
       std::string tmp{s};
       if (ptr->left != nullptr )
         tmp += "|";
@@ -113,31 +128,40 @@ public:
       graph_print(ptr->left, s);
     }
   }
+
+  
   /***********************************************************************************************************************************************************************************************************/
  public:
   /**
    * Returns an iterator (i.e. generalized pointer) to the last node of the tree, where the ordered is specified by the key value.
    */
-  Iterator last(){
+  Iterator last() const{
     return last(root.get());
   }
   /**
    * Returns an iterator (i.e. generalized pointer) to the first node of the tree, that is the node with the lowest key value.
    */
-  Iterator begin(){
+  Iterator begin() const{
     return begin(root.get());
   }
   /**
    * Returns an null iterator (i.e. generalized pointer) in order to determine out of bound access to the tree.
    */
-  Iterator end(){
+  Iterator end() const{
     return Iterator{nullptr};
   }
-
+  /**
+   * Returns a constant iterator (i.e. generalized pointer) to the first node of the tree, that is the node with the lowest key value.
+   */
+  ConstIterator cbegin() const { return ConstIterator{(this->begin()).get()}; }
+  /**
+   * Returns an null iterator (i.e. generalized pointer) in order to determine out of bound access to the tree.
+   */
+  ConstIterator cend() const { return ConstIterator{nullptr}; }
   /**
    * Adds iteratively a new node to the tree with value \p val and key \p key
    */
-  Iterator insert(const K & key, const T & val){
+  Iterator insert(const K & key, const V & val){
     return insert(key, val, root, nullptr);
   }
   
@@ -156,11 +180,15 @@ public:
     graph_print(root, s);
     std::cout << "\n";
   }
-
+  /**
+   * Returns the length of the tree.
+   */
+  size_t len() const { return _len; }
+  
 };
 
-template < typename K, typename T>
-void Tree<K,T>::Node::print(){
+template < typename K, typename V>
+void Tree<K,V>::Node::print(){
   std::cout << "key: " << _pair.first << "\t value: "
     <<  _pair.second << "\t left son: ";
   if ( left != nullptr )
@@ -196,12 +224,12 @@ template <typename K, typename V>
   /**
    * Returns a raw pointer to the node pointed by the current iterator.
    */
-  Node *get(){ return current; }
+  Node *get() const { return current; }
 
    /**
    * Returns an iterator pointing to the \p godfather of the node associated to the current iterator.
    */
-  Iterator get_godfather(){ return Iterator(current->godfather); }
+  Iterator get_godfather() const { return Iterator(current->godfather); }
 
    /**
    * Returns true if the iterator is pointing to the last element of th tree, else returns false. 
@@ -260,10 +288,9 @@ class Tree<K,V>::ConstIterator : public Tree<K,V>::Iterator {
   const V& operator*() const { return parent::operator*(); }
 };
 
-
 /* Extra stuff */
-template < typename K, typename T>
-  void Tree<K,T>::naive_print(std::unique_ptr<Node> & ptr){
+template < typename K, typename V>
+  void Tree<K,V>::naive_print(std::unique_ptr<Node> & ptr){
   if (ptr->left != nullptr )
     naive_print(ptr->left);
   if (ptr->right != nullptr )

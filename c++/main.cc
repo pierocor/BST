@@ -27,6 +27,11 @@ int main(){
   }
   std::cout << std::endl;
 
+  std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
+
+  Tree<int, int>::ConstIterator tmp2{BT.cbegin()};
+  std::cout << "Beccati questo const iterator: " << *tmp2 << std::endl;
+
   // BT.naive_print();
   return 0;
 }
