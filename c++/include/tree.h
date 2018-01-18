@@ -100,7 +100,6 @@ public:
 
     return Iterator(nullptr);
   }
-
   /**
    * Prints the nodes of the tree to stdout.
    */
@@ -129,6 +128,20 @@ public:
     }
   }
 
+  Iterator find(const K & key, std::unique_ptr<Node> & ptr){
+
+    if (ptr->_pair.first == key ){
+      return Iterator(ptr);
+    }
+    if( ptr->_pair.first > key ){
+      return find(key,ptr->left);
+    }
+    if( ptr->_pair.first < key ){
+      return find(key,ptr->right);
+    }
+    return Iterator(nullptr);
+    
+  }
   
   /***********************************************************************************************************************************************************************************************************/
  public:
@@ -142,8 +155,12 @@ public:
    * Returns an iterator (i.e. generalized pointer) to the first node of the tree, that is the node with the lowest key value.
    */
   Iterator begin() const{
-    return begin(root.get());
-  }
+    Node *tmp{root.get()};
+    while(tmp->left!=nullptr){
+      tmp=(tmp->left).get();
+    }
+    return Iterator(tmp);
+    }
   /**
    * Returns an null iterator (i.e. generalized pointer) in order to determine out of bound access to the tree.
    */
@@ -184,6 +201,14 @@ public:
    * Returns the length of the tree.
    */
   size_t len() const { return _len; }
+  /**
+   * Removes every node in the tree.
+   */
+  void clean(){ root.reset(nullptr); }
+  /**
+   * Returns an iterator to the node with key \p key. If the node does not exist return end().
+   */
+  Iterator find(const K key) { return find(key,root); };
   
 };
 
@@ -207,7 +232,6 @@ void Tree<K,V>::Node::print(){
 
 }
 
-// Iterator definitions
 template <typename K, typename V>
   class Tree<K,V>::Iterator {
   using Node = Tree<K,V>::Node;
@@ -217,9 +241,13 @@ template <typename K, typename V>
  Iterator(std::unique_ptr<Node> &n) : current{n.get()} {}
  Iterator(Node *n): current{n} {}
   /**
+   * Returns the key associated to node pointed by the current iterator.
+   */
+  std::pair<K,V>& operator*() const { return current->_pair; }
+  /**
    * Returns the value associated to node pointed by the current iterator.
    */
-  K& operator*() const { return (current->_pair).first; }
+  V val(){ return (current->_pair).second; }
 
   /**
    * Returns a raw pointer to the node pointed by the current iterator.
@@ -282,20 +310,26 @@ template <typename K, typename V>
 template < typename K, typename V>
 class Tree<K,V>::ConstIterator : public Tree<K,V>::Iterator {
   using parent = Tree<K,V>::Iterator;
-
  public:
-  using parent::Iterator;
+  using parent::Iterator; // PBM: ask alberto
   const V& operator*() const { return parent::operator*(); }
 };
 
 /* Extra stuff */
 template < typename K, typename V>
   void Tree<K,V>::naive_print(std::unique_ptr<Node> & ptr){
-  if (ptr->left != nullptr )
-    naive_print(ptr->left);
-  if (ptr->right != nullptr )
-    naive_print(ptr->right);
-  (*ptr).print();
+  if(ptr==nullptr){
+    std::cout << "The tree is empty." << std::endl;
+  }else{
+    if (ptr->left != nullptr )
+      naive_print(ptr->left);
+    if (ptr->right != nullptr )
+      naive_print(ptr->right);
+    (*ptr).print();
+  }
 }
+
+
+
 
 #endif
