@@ -5,6 +5,16 @@
 #include<iostream>
 #include <string>
 #include <iostream>
+
+
+namespace std{
+  template < typename K, typename V>
+	std::ostream& operator<<(std::ostream& strm, const std::pair< K, V>& pair)
+	{
+		strm << "(\e[1m" << pair.first << "\e[0m," << pair.second << ")";
+		return strm;
+	}
+}
 /**
  * Class for binary trees.
  */
@@ -13,11 +23,11 @@ class Tree{
 private:
   class Node {
   public:
-    std::pair<K,V> _pair;
+    std::pair<K,V> _pair;   // PBM.PC : K to be replaced by const K ?
     std::unique_ptr<Node> left;
     std::unique_ptr<Node> right;
     Node *godfather;
-    
+
     /**
      * Node Constructor. Takes \p key for the key and \p val for the
      * value. Optionally the children and the godfather (i.e. the first "left" ancestor) can be specified.
@@ -29,16 +39,17 @@ private:
      * Prints the key, value and children's keys of a node.
      */
     void print();
+    void full_print(); // PBM: not required.. DEBUG ONLY!
 
-    // PBM: this functions are useful to linearize and balancing the tree 
+    // PBM: this functions are useful to linearize and balancing the tree
     /**
-     * Sets the right pointer to a new value. 
+     * Sets the right pointer to a new value.
      */
     void setr(std::unique_ptr<Node> &newptr){
       right=newptr;
     }
     /**
-     * Sets the left pointer to a new value. 
+     * Sets the left pointer to a new value.
      */
     void setl(std::unique_ptr<Node> &newptr){
       left=newptr;
@@ -117,12 +128,12 @@ public:
     if (ptr->right != nullptr ){
       std::string tmp{s};
       if (ptr->left != nullptr )
-        tmp += "|";
+        tmp += "\e[31m|\e[0m";
       tmp += "\t";
       graph_print(ptr->right, tmp);
     }
     if (ptr->left != nullptr ){
-      std::cout << std::endl << s << "|";
+      std::cout << std::endl << s << "\e[31m|\e[0m";
       std::cout << std::endl << s;
       graph_print(ptr->left, s);
     }
@@ -140,9 +151,9 @@ public:
       return find(key,ptr->right);
     }
     return Iterator(nullptr);
-    
+
   }
-  
+
   /***********************************************************************************************************************************************************************************************************/
  public:
   /**
@@ -181,7 +192,7 @@ public:
   Iterator insert(const K & key, const V & val){
     return insert(key, val, root, nullptr);
   }
-  
+
   /**
    * Prints the nodes of the tree to stdout.
    */
@@ -209,11 +220,11 @@ public:
    * Returns an iterator to the node with key \p key. If the node does not exist return end().
    */
   Iterator find(const K key) { return find(key,root); };
-  
-};
 
+};
+// PBM: DEBUG ONLY!
 template < typename K, typename V>
-void Tree<K,V>::Node::print(){
+void Tree<K,V>::Node::full_print(){
   std::cout << "key: " << _pair.first << "\t value: "
     <<  _pair.second << "\t left son: ";
   if ( left != nullptr )
@@ -229,7 +240,11 @@ void Tree<K,V>::Node::print(){
     std::cout << "\t GP: nullptr" << std::endl;
   else
     std::cout << "\t GP: key " << (*godfather)._pair.first << std::endl;
+}
 
+template < typename K, typename V>
+void Tree<K,V>::Node::print(){
+  std::cout << _pair;
 }
 
 template <typename K, typename V>
@@ -260,7 +275,7 @@ template <typename K, typename V>
   Iterator get_godfather() const { return Iterator(current->godfather); }
 
    /**
-   * Returns true if the iterator is pointing to the last element of th tree, else returns false. 
+   * Returns true if the iterator is pointing to the last element of th tree, else returns false.
    */
   bool islast(){
     Node *tmp=this->get();
@@ -280,7 +295,7 @@ template <typename K, typename V>
         current = (current->left).get();
 	    return *this;
     }else{
-	    current=(this->get_godfather()).get();
+	    current = current->godfather;
 	    return *this;
     }
   };
@@ -293,7 +308,7 @@ template <typename K, typename V>
     ++(*this);
     return it;
   }
- 
+
   /**
    * Returns true if two iterators point to the same node, false else.
    */
