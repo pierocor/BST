@@ -10,8 +10,12 @@ int main(){
   //BT.naive_print();
   srand (SEED);
   BT.insert( 5, -1);
+  for ( int i = 0; i < 10; ++i ){
+    BT.insert( rand()%50, rand()%100 );
+  }
+  BT.insert(10, -1);
   for ( int i = 0; i < 100; ++i ){
-    BT.insert( rand()%10000, rand()%100 );
+    BT.insert( rand()%50, rand()%100 );
   }
   Tree<int, int>::Iterator tmp{BT.insert( 5, -1)};
   BT.graph_print();
@@ -31,14 +35,15 @@ int main(){
   */
   std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
 
-  Tree<int, int>::ConstIterator tmp2{BT.cbegin()};
+
   // std::cout << "Beccati questo const iterator: " << (*tmp2).first << std::endl;
 
   //BT.clean();
   BT.naive_print();
 
-  tmp=BT.find(5);
-  std::cout << "The node with key 5 has value: "<< tmp.val() << std::endl;
-  
+  tmp=BT.find(10);
+  std::cout << "The node with key 10 has value: "<< tmp.val() << std::endl;
+  BT.erase(10);
+  BT.graph_print();
   return 0;
 }

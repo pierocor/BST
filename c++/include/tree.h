@@ -217,9 +217,55 @@ public:
    */
   void clean(){ root.reset(nullptr); }
   /**
+   * Delete a node of the tree.
+   */
+
+   /**
+    * Right rotation!
+    */
+  Iterator rotate_right( Iterator & it ){
+    if ( it.get()->right == nullptr )
+        return it;    // PBM exception?!
+
+  }
+  /**
    * Returns an iterator to the node with key \p key. If the node does not exist return end().
    */
   Iterator find(const K key) { return find(key,root); };
+
+  void erase(const K key) {
+    std::unique_ptr<Node> * ptr{ &root };
+    while( ((*ptr).get())->_pair.first != key && (*ptr).get() != nullptr ){
+      std::cout << ((*ptr).get())->_pair.first << " ";
+      if( (*ptr) -> _pair.first > key ){
+        ptr = &((*ptr)->left);
+      }
+      else{
+        ptr = &((*ptr)->right);
+      }
+    }
+    if ( (*ptr).get() == nullptr ){   // PBM.PC: non ha trovato la key. exception?
+      std::cout << "There is no node with the desired key.";
+      return;
+    }
+    while( (*ptr) -> right != nullptr ){ // Finché quello che voglio eliminare ha qualcosa a dx,
+      // lo ruoto a dx!  *ptr-> A ----- B --- t3...
+      //                        |       |
+      //                        t1      t2
+      Node * tmp = (*ptr).release(); // 1. il padre rilascia quello che voglio ruotare (A, ora puntato da tmp)
+      (*ptr).reset((tmp->right).release()); // 2. e prende come figlio il suo figlio dx (B)
+      (tmp -> right).reset( (((*ptr).get())->left).release() );
+       // 3. il figlio di sx di B (t2) viene liberato e diventa il figlio dx di A (liberato al passo 2)
+      (((*ptr).get())->left).reset(tmp); // 4. A può ora diventare il figlio di sx di B
+      ptr = &(((*ptr).get())->left);  // ptr è l'indirizzo del puntatore figlio di sx di B ( che punta ad A )
+      //  ... B ---- t3...
+      //      | <--- ptr
+      //      A ---- t2
+      //      |
+      //      t1
+    }
+    (*ptr).reset( ((*ptr)->left).release() );
+  }
 
 };
 // PBM: DEBUG ONLY!
