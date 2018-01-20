@@ -288,6 +288,7 @@ public:
    * till it has no right son. At this point it can be erased connecting
    * its father with its left son.
    */
+
   void erase(const K key) {
     std::unique_ptr<Node> * ptr{ &root };
     while( (*ptr)->_pair.first != key && *ptr != nullptr ){
@@ -335,6 +336,7 @@ public:
   //   release_left_subtree(& root);
   // }
 ////////////////////////////////////////
+
 };
 // PBM: DEBUG ONLY!
 template < typename K, typename V>
