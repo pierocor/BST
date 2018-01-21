@@ -10,12 +10,12 @@ int main(){
   //BT.naive_print();
   srand (SEED);
   BT.insert( 5, -1);
-  for ( int i = 0; i < 10; ++i ){
-    BT.insert( rand()%50, rand()%100 );
+  for ( int i = 0; i < 5; ++i ){
+    BT.insert( rand()%20, rand()%100 );
   }
   BT.insert(10, -1);
-  for ( int i = 0; i < 100; ++i ){
-    BT.insert( rand()%50, rand()%100 );
+  for ( int i = 0; i < 25; ++i ){
+    BT.insert( rand()%30, rand()%100 );
   }
   Tree<int, int>::Iterator tmp{BT.insert( 5, -1)};
   BT.graph_print();
