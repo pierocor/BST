@@ -38,8 +38,8 @@ private:
     /**
      * Prints the key, value and children's keys of a node.
      */
-    void print();
-    void full_print(); // PBM: not required.. DEBUG ONLY!
+    void print() const;
+    void full_print() const; // PBM: not required.. DEBUG ONLY!
 
     // PBM: this functions are useful to linearize and balancing the tree
     /**
@@ -114,12 +114,12 @@ public:
   /**
    * Prints the nodes of the tree to stdout.
    */
-  void naive_print(std::unique_ptr<Node> & ptr);
+  void naive_print( const std::unique_ptr<Node> & ptr) const;
 
   /**
    * Prints the tree as a graph.
    */
-  void graph_print(std::unique_ptr<Node> & ptr, std::string & s) {
+  void graph_print( const std::unique_ptr<Node> & ptr, std::string & s) const {
     if (ptr->right != nullptr ){
       std::cout.fill('-');
       std::cout.width(8);
@@ -139,8 +139,9 @@ public:
     }
   }
 
-  Iterator find(const K & key, std::unique_ptr<Node> & ptr){
-
+  Iterator find(const K & key, const std::unique_ptr<Node> & ptr) const {
+    if ( ptr == nullptr )
+      return Iterator(nullptr);
     if (ptr->_pair.first == key ){
       return Iterator(ptr);
     }
@@ -150,8 +151,7 @@ public:
     if( ptr->_pair.first < key ){
       return find(key,ptr->right);
     }
-    return Iterator(nullptr);
-
+    return Iterator(nullptr); // PBM.PC Exception? it isn't needed, but wo there's a warning
   }
 
   /***********************************************************************************************************************************************************************************************************/
@@ -171,7 +171,7 @@ public:
       tmp=(tmp->left).get();
     }
     return Iterator(tmp);
-    }
+  }
   /**
    * Returns an null iterator (i.e. generalized pointer) in order to determine out of bound access to the tree.
    */
@@ -194,15 +194,24 @@ public:
   }
 
   /**
-   * Prints the nodes of the tree to stdout.
+   * Prints to stdout \p key : \p value of each node starting from the root.
    */
-  void naive_print(){ naive_print(root); }
+  void naive_print() const { naive_print(root); }
+  /**
+   * Prints \p key : \p value of each node properly oredered.
+   */
+  void print() const {
+    for (auto& it : *this ) {
+      std::cout << it << " ";
+    }
+    std::cout << std::endl;
+   }
 
   // PBM.PC - working till 8 digits!!
   /**
    * Prints the tree as a graph.
    */
-  void graph_print(){
+  void graph_print() const {
     std::cout << "\n*\n";
     std::string s;
     graph_print(root, s);
@@ -216,14 +225,29 @@ public:
    * Removes every node in the tree.
    */
   void clean(){ root.reset(nullptr); }
-  /**
-   * Delete a node of the tree.
-   */
-
    /**
     * Returns an iterator to the node with key \p key. If the node does not exist return end().
     */
-   Iterator find(const K key) { return find(key,root); };
+   Iterator find(const K key) const { return find(key,root); }
+
+  V & operator[] ( const K & key ) noexcept {
+     Iterator it = find(key);
+     if ( it.get() == nullptr ){    // PBM.PC exception?
+       std::cout << "opss.. New node added!";
+       it = insert( key, V{} );
+     }
+     return (*it).second;
+   }
+
+   ////////////////////// PBM.PC: come fa ad essere const se può aggiungere un nodo??
+   // const V & operator[]( const K & key ) const noexcept {
+   //  Iterator it = find(key);
+   //  if ( it.get() == nullptr ){
+   //    std::cout << "No node with this key";
+   //    it = insert( key, V{} );
+   //  }
+   //  return (*this)[ key ];
+   // }
 
    /**
     * @brief Left rotation of the tree centered on the node associated to the \p unique_ptr<Node> pointed by \p ptr (in the example: A).
@@ -287,7 +311,7 @@ public:
 };
 // PBM: DEBUG ONLY!
 template < typename K, typename V>
-void Tree<K,V>::Node::full_print(){
+void Tree<K,V>::Node::full_print() const {
   std::cout << "key: " << _pair.first << "\t value: "
     <<  _pair.second << "\t left son: ";
   if ( left != nullptr )
@@ -306,7 +330,7 @@ void Tree<K,V>::Node::full_print(){
 }
 
 template < typename K, typename V>
-void Tree<K,V>::Node::print(){
+void Tree<K,V>::Node::print() const {
   std::cout << _pair;
 }
 
@@ -316,8 +340,8 @@ template <typename K, typename V>
   Node *current;
 
  public:
- Iterator(std::unique_ptr<Node> &n) : current{n.get()} {}
- Iterator(Node *n): current{n} {}
+ Iterator(const std::unique_ptr<Node> &n) : current{n.get()} {}
+ Iterator( Node *n): current{n} {}
   /**
    * Returns the key associated to node pointed by the current iterator.
    */
@@ -395,7 +419,7 @@ class Tree<K,V>::ConstIterator : public Tree<K,V>::Iterator {
 
 /* Extra stuff */
 template < typename K, typename V>
-  void Tree<K,V>::naive_print(std::unique_ptr<Node> & ptr){
+  void Tree<K,V>::naive_print( const std::unique_ptr<Node> & ptr) const {
   if(ptr==nullptr){
     std::cout << "The tree is empty." << std::endl;
   }else{
@@ -403,7 +427,8 @@ template < typename K, typename V>
       naive_print(ptr->left);
     if (ptr->right != nullptr )
       naive_print(ptr->right);
-    (*ptr).print();
+    ptr->print();
+    // std::cout << (*this)[ ptr->_pair.first ] ;
   }
 }
 

@@ -17,7 +17,6 @@ int main(){
   for ( int i = 0; i < 25; ++i ){
     BT.insert( rand()%30, rand()%100 );
   }
-  Tree<int, int>::Iterator tmp{BT.insert( 5, -1)};
   BT.graph_print();
   /*
   std::cout << std::endl << " ++node(5): " << (*(++tmp)).first << std::endl;
@@ -28,10 +27,6 @@ int main(){
   }
   std::cout << std::endl;
 
-  for (auto& it : BT) {
-    std::cout << (*it).first << " ";
-  }
-  std::cout << std::endl;
   */
   std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
 
@@ -40,10 +35,12 @@ int main(){
 
   //BT.clean();
   BT.naive_print();
-
-  tmp=BT.find(10);
-  std::cout << "The node with key 10 has value: "<< tmp.val() << std::endl;
+  std::cout << "\nThe node with key 10 has value: "<< BT[10] << std::endl;
   BT.erase(10);
+  BT.print();
+  std::cout << "The node with key 10 has value: "<< BT[10] << std::endl;
+  BT[10] = -1;
+  std::cout << "The node with key 10 has value: "<< BT[10] << std::endl;
   BT.graph_print();
   return 0;
 }
