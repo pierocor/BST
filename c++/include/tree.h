@@ -64,6 +64,14 @@ private:
 public:
  Tree() : root{nullptr}, _len{0}, _first{nullptr}, _last{nullptr} {};
 
+  //Copy contructor
+  Tree(const Tree&);
+  Tree& operator=(const Tree&);
+
+  //Move constructor
+  Tree(Tree&&);
+  Tree& operator=(Tree&&);
+  
   class Iterator;
   class ConstIterator;
 
@@ -513,6 +521,14 @@ template < typename K, typename V>
     ptr->full_print();
   }
 }
+
+template<typename K, typename V>
+  Tree:: Tree(const Tree& in): root{(Insert(((in.root)->_pair).first,((in.root)->_pair).second,nullptr)).get()}, _len{in._len}, _first{nullptr}, _last{nullptr} {
+    ;
+
+}
+
+ Tree() :  {};
 
 
 
