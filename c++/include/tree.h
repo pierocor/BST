@@ -190,6 +190,35 @@ public:
     }
     return Iterator(nullptr); // PBM.PC Exception? it isn't needed, but wo there's a warning
   }
+  /**
+   * Release all the unique pointers of the sub-tree having \p ptr as root,
+   *  loosing permanently the tree strucutre.
+   */
+  void release_subtree( std::unique_ptr<Node> & ptr ){
+    if ( ptr == nullptr )
+      return;
+    release_subtree( ptr->left );
+    release_subtree( ptr->right );
+    ptr.release();
+  }
+  /**
+   * Find recursively the middle points of a linked list of length \p N and starting from \p first.
+   *
+   * To be call only if the tree strucutre has already been released.
+   */
+  void balance( std::unique_ptr<Node> & ptr, Node * first, int N ){
+    if ( N <= 0 )
+      return;
+    Node * tmp = first;
+    for ( int i = 0; i < N/2; ++i ){
+      tmp = tmp->_next;
+    }
+    std::cout << N << ":" << tmp->_pair << " ";
+    ptr.reset(tmp);
+    balance(tmp->left, first, N/2);
+    balance(tmp->right, ptr->_next, N - N/2 - 1);
+  }
+
 
   /***********************************************************************************************************************************************************************************************************/
  public:
@@ -334,6 +363,12 @@ public:
       rotate_left(ptr);
     }
     (*ptr).reset( ((*ptr)->left).release() );
+    --_len;
+  }
+
+  void balance(){
+    release_subtree(root);
+    balance( root, _first, _len);
   }
 //////////////////////////////////////// HERE PBM.PC WIP before next strategy
   // Node * release_left_sons( Node * ptr ){
@@ -415,11 +450,6 @@ template <typename K, typename V>
    * Returns a raw pointer to the node pointed by the current iterator.
    */
   Node *get() const { return current; }
-
-   /**
-   * Returns an iterator pointing to the \p godfather of the node associated to the current iterator.
-   */
-  Iterator get_godfather() const { return Iterator(current->godfather); }
 
    /**
    * Returns true if the iterator is pointing to the last element of th tree, else returns false.

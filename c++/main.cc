@@ -2,7 +2,7 @@
 #include<tree.h>
 #ifndef SEED
 #include <time.h>
-#define SEED 0//time(NULL)
+#define SEED time(NULL)
 #endif
 
 int main(){
@@ -18,34 +18,23 @@ int main(){
     BT.insert( rand()%30, rand()%100 );
   }
   BT.graph_print();
-  /*
-  std::cout << std::endl << " ++node(5): " << (*(++tmp)).first << std::endl;
-  std::cout << std::endl << " node(5)++: " << (*(tmp++)).first << std::endl;
-
-  for (Tree<int, int>::Iterator it = BT.begin(); it != BT.end(); ++it) {
-   std::cout << *it << " ";
-  }
-  std::cout << std::endl;
-
-  */
   std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
-
-
-  // std::cout << "Beccati questo const iterator: " << (*tmp2).first << std::endl;
-
   BT.naive_print();
   BT.print();
-
   std::cout << "last has key: " << BT.last_key() << "\nfirst has key: " << (*(BT.begin())).first << std::endl;
 
   BT.erase(10);
-
   BT.graph_print();
-
   std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
   BT.naive_print();
   BT.print();
+  std::cout << "last has key: " << BT.last_key() << "\nfirst has key: " << (*(BT.begin())).first << std::endl;
 
+  BT.balance();
+  BT.graph_print();
+  std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
+  BT.naive_print();
+  BT.print();
   std::cout << "last has key: " << BT.last_key() << "\nfirst has key: " << (*(BT.begin())).first << std::endl;
 
 
