@@ -5,6 +5,16 @@
 #include<iostream>
 #include <string>
 #include <iostream>
+
+
+namespace std{
+  template < typename K, typename V>
+	std::ostream& operator<<(std::ostream& strm, const std::pair< K, V>& pair)
+	{
+		strm << "(\e[1m" << pair.first << "\e[0m," << pair.second << ")";
+		return strm;
+	}
+}
 /**
  * Class for binary trees.
  */
@@ -13,11 +23,11 @@ class Tree{
 private:
   class Node {
   public:
-    std::pair<K,V> _pair;
+    std::pair<K,V> _pair;   // PBM.PC : K to be replaced by const K ?
     std::unique_ptr<Node> left;
     std::unique_ptr<Node> right;
     Node *godfather;
-    
+
     /**
      * Node Constructor. Takes \p key for the key and \p val for the
      * value. Optionally the children and the godfather (i.e. the first "left" ancestor) can be specified.
@@ -28,17 +38,18 @@ private:
     /**
      * Prints the key, value and children's keys of a node.
      */
-    void print();
+    void print() const;
+    void full_print() const; // PBM: not required.. DEBUG ONLY!
 
-    // PBM: this functions are useful to linearize and balancing the tree 
+    // PBM: this functions are useful to linearize and balancing the tree
     /**
-     * Sets the right pointer to a new value. 
+     * Sets the right pointer to a new value.
      */
     void setr(std::unique_ptr<Node> &newptr){
       right=newptr;
     }
     /**
-     * Sets the left pointer to a new value. 
+     * Sets the left pointer to a new value.
      */
     void setl(std::unique_ptr<Node> &newptr){
       left=newptr;
@@ -103,12 +114,12 @@ public:
   /**
    * Prints the nodes of the tree to stdout.
    */
-  void naive_print(std::unique_ptr<Node> & ptr);
+  void naive_print( const std::unique_ptr<Node> & ptr) const;
 
   /**
    * Prints the tree as a graph.
    */
-  void graph_print(std::unique_ptr<Node> & ptr, std::string & s) {
+  void graph_print( const std::unique_ptr<Node> & ptr, std::string & s) const {
     if (ptr->right != nullptr ){
       std::cout.fill('-');
       std::cout.width(8);
@@ -117,19 +128,20 @@ public:
     if (ptr->right != nullptr ){
       std::string tmp{s};
       if (ptr->left != nullptr )
-        tmp += "|";
+        tmp += "\e[31m|\e[0m";
       tmp += "\t";
       graph_print(ptr->right, tmp);
     }
     if (ptr->left != nullptr ){
-      std::cout << std::endl << s << "|";
+      std::cout << std::endl << s << "\e[31m|\e[0m";
       std::cout << std::endl << s;
       graph_print(ptr->left, s);
     }
   }
 
-  Iterator find(const K & key, std::unique_ptr<Node> & ptr){
-
+  Iterator find(const K & key, const std::unique_ptr<Node> & ptr) const {
+    if ( ptr == nullptr )
+      return Iterator(nullptr);
     if (ptr->_pair.first == key ){
       return Iterator(ptr);
     }
@@ -139,10 +151,9 @@ public:
     if( ptr->_pair.first < key ){
       return find(key,ptr->right);
     }
-    return Iterator(nullptr);
-    
+    return Iterator(nullptr); // PBM.PC Exception? it isn't needed, but wo there's a warning
   }
-  
+
   /***********************************************************************************************************************************************************************************************************/
  public:
   /**
@@ -160,7 +171,7 @@ public:
       tmp=(tmp->left).get();
     }
     return Iterator(tmp);
-    }
+  }
   /**
    * Returns an null iterator (i.e. generalized pointer) in order to determine out of bound access to the tree.
    */
@@ -181,17 +192,26 @@ public:
   Iterator insert(const K & key, const V & val){
     return insert(key, val, root, nullptr);
   }
-  
+
   /**
-   * Prints the nodes of the tree to stdout.
+   * Prints to stdout \p key : \p value of each node starting from the root.
    */
-  void naive_print(){ naive_print(root); }
+  void naive_print() const { naive_print(root); }
+  /**
+   * Prints \p key : \p value of each node properly oredered.
+   */
+  void print() const {
+    for (auto& it : *this ) {
+      std::cout << it << " ";
+    }
+    std::cout << std::endl;
+   }
 
   // PBM.PC - working till 8 digits!!
   /**
    * Prints the tree as a graph.
    */
-  void graph_print(){
+  void graph_print() const {
     std::cout << "\n*\n";
     std::string s;
     graph_print(root, s);
@@ -205,15 +225,120 @@ public:
    * Removes every node in the tree.
    */
   void clean(){ root.reset(nullptr); }
-  /**
-   * Returns an iterator to the node with key \p key. If the node does not exist return end().
-   */
-  Iterator find(const K key) { return find(key,root); };
-  
-};
+   /**
+    * Returns an iterator to the node with key \p key. If the node does not exist return end().
+    */
+   Iterator find(const K key) const { return find(key,root); }
 
+  V & operator[] ( const K & key ) {
+     Iterator it = find(key);
+     if ( it.get() == nullptr ){    // PBM.PC exception?
+       std::cout << "opss.. New node added!";
+       it = insert( key, V{} );
+     }
+     return (*it).second;
+   }
+
+   ////////////////////// PBM.PC: come fa ad essere const se può aggiungere un nodo??
+   const V & operator[]( const K & key ) const noexcept {
+    Iterator it = find(key);
+    if ( it.get() == nullptr ){
+      std::cout << "No node with this key";
+      return V{};
+    }
+    return (*this)[ key ];
+   }
+
+   /**
+    * @brief Left rotation of the tree centered on the node associated to the \p unique_ptr<Node> pointed by \p ptr (in the example: A).
+    *
+    * @code
+    * ptr -> \
+    *         A ----- B --- t3...
+    *         |       |
+    *         t1      t2
+    * @endcode
+    * 1. \p *ptr is released and its value stored on a temporary pointer to \p Node.
+    * 2. The right son of A (->B) is released, thus \p *ptr can be associeted to B.
+    * 3. The left son of B (->t2) is released and stored as right son of A.
+    * 4. A can be stored as left son of B.
+    * 5. \p ptr is updated, it points now to the left son of B (->A).
+    *
+    * @code
+    *     \
+    *      B ---- t3
+    *      | <- ptr
+    *      A ---- t2
+    *      |
+    *      t1
+    * @endcode
+    */
+  void rotate_left( std::unique_ptr<Node> * & ptr ){
+    if ( (*ptr)->right == nullptr )
+        return;    // PBM.PC exception?!
+    Node * tmp = (*ptr).release(); // 1.
+    (*ptr).reset((tmp->right).release()); // 2.
+    (tmp -> right).reset( ((*ptr)->left).release() ); // 3.
+    ((*ptr)->left).reset(tmp); // 4.
+    ptr = &((*ptr)->left);  //5.
+  }
+  /**
+   * Delete the node with key \p key.
+   * This function performs left rotations on the tree centered on that node
+   * till it has no right son. At this point it can be erased connecting
+   * its father with its left son.
+   */
+  void erase(const K key) {
+    std::unique_ptr<Node> * ptr{ &root };
+    while( (*ptr)->_pair.first != key && *ptr != nullptr ){
+      if( (*ptr) -> _pair.first > key ){
+        ptr = &((*ptr)->left);
+      }
+      else{
+        ptr = &((*ptr)->right);
+      }
+    }
+    if ( *ptr == nullptr ){   // PBM.PC: non ha trovato la key. exception?
+      std::cout << "There is no node with the desired key.";
+      return;
+    }
+    while( (*ptr) -> right != nullptr ){ // Finché quello che voglio eliminare ha qualcosa a dx,
+      rotate_left(ptr);
+    }
+    (*ptr).reset( ((*ptr)->left).release() );
+  }
+//////////////////////////////////////// HERE PBM.PC WIP before next strategy 
+  // Node * release_left_sons( Node * ptr ){
+  //   while( (*ptr)->left != nullptr ){
+  //     ptr = ((*ptr)->left).release();
+  //   }
+  //   return ptr;
+  // }
+  // void release_left_subtree( Node * ptr ){
+  //   if( (*ptr)->left != nullptr ){
+  //     release_left_subtree(release_left_sons(ptr));
+  //   }
+  //
+  //   if( (*ptr)->right != nullptr ){
+  //     ((*ptr)->right).reset(release_left_sons((*ptr)->right));
+  //     // ((*ptr)->right).reset(release_left_sons(((*ptr)->right).release()));
+  //     release_left_subtree((*ptr)->right);
+  //   }
+  //   if( (*ptr)->godfather != nullptr ){
+  //     ((*ptr)->right).reset( (*ptr)->godfather );
+  //     release_left_subtree((*ptr)->right);
+  //   }
+  //   return;
+  // }
+  //
+  // void linked_list(){
+  //   release_left_subtree(& root);
+  // }
+////////////////////////////////////////
+};
+// PBM: DEBUG ONLY!
 template < typename K, typename V>
-void Tree<K,V>::Node::print(){
+void Tree<K,V>::Node::full_print() const {
   std::cout << "key: " << _pair.first << "\t value: "
     <<  _pair.second << "\t left son: ";
   if ( left != nullptr )
@@ -229,7 +354,11 @@ void Tree<K,V>::Node::print(){
     std::cout << "\t GP: nullptr" << std::endl;
   else
     std::cout << "\t GP: key " << (*godfather)._pair.first << std::endl;
+}
 
+template < typename K, typename V>
+void Tree<K,V>::Node::print() const {
+  std::cout << _pair;
 }
 
 template <typename K, typename V>
@@ -238,8 +367,8 @@ template <typename K, typename V>
   Node *current;
 
  public:
- Iterator(std::unique_ptr<Node> &n) : current{n.get()} {}
- Iterator(Node *n): current{n} {}
+ Iterator(const std::unique_ptr<Node> &n) : current{n.get()} {}
+ Iterator( Node *n): current{n} {}
   /**
    * Returns the key associated to node pointed by the current iterator.
    */
@@ -260,7 +389,7 @@ template <typename K, typename V>
   Iterator get_godfather() const { return Iterator(current->godfather); }
 
    /**
-   * Returns true if the iterator is pointing to the last element of th tree, else returns false. 
+   * Returns true if the iterator is pointing to the last element of th tree, else returns false.
    */
   bool islast(){
     Node *tmp=this->get();
@@ -280,7 +409,7 @@ template <typename K, typename V>
         current = (current->left).get();
 	    return *this;
     }else{
-	    current=(this->get_godfather()).get();
+	    current = current->godfather;
 	    return *this;
     }
   };
@@ -293,7 +422,7 @@ template <typename K, typename V>
     ++(*this);
     return it;
   }
- 
+
   /**
    * Returns true if two iterators point to the same node, false else.
    */
@@ -317,7 +446,7 @@ class Tree<K,V>::ConstIterator : public Tree<K,V>::Iterator {
 
 /* Extra stuff */
 template < typename K, typename V>
-  void Tree<K,V>::naive_print(std::unique_ptr<Node> & ptr){
+  void Tree<K,V>::naive_print( const std::unique_ptr<Node> & ptr) const {
   if(ptr==nullptr){
     std::cout << "The tree is empty." << std::endl;
   }else{
@@ -325,7 +454,8 @@ template < typename K, typename V>
       naive_print(ptr->left);
     if (ptr->right != nullptr )
       naive_print(ptr->right);
-    (*ptr).print();
+    // ptr->print();
+    std::cout << (*this)[ ptr->_pair.first ] ;
   }
 }
 

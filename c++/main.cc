@@ -10,35 +10,30 @@ int main(){
   //BT.naive_print();
   srand (SEED);
   BT.insert( 5, -1);
-  for ( int i = 0; i < 10; ++i ){
-    BT.insert( rand()%10, rand()%100 );
+  for ( int i = 0; i < 5; ++i ){
+    BT.insert( rand()%20, rand()%100 );
   }
-  Tree<int, int>::Iterator tmp{BT.insert( 5, -1)};
+  BT.insert(10, -1);
+  for ( int i = 0; i < 25; ++i ){
+    BT.insert( rand()%30, rand()%100 );
+  }
   BT.graph_print();
   /*
   std::cout << std::endl << " ++node(5): " << (*(++tmp)).first << std::endl;
   std::cout << std::endl << " node(5)++: " << (*(tmp++)).first << std::endl;
 
   for (Tree<int, int>::Iterator it = BT.begin(); it != BT.end(); ++it) {
-    std::cout << (*it).first << " ";
-}
-  std::cout << std::endl;
-
-  for (auto& it : BT) {
-    std::cout << (*it).first << " ";
+   std::cout << *it << " ";
   }
   std::cout << std::endl;
+
   */
   std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
 
-  Tree<int, int>::ConstIterator tmp2{BT.cbegin()};
+
   // std::cout << "Beccati questo const iterator: " << (*tmp2).first << std::endl;
 
-  //BT.clean();  
-  BT.naive_print();
-
-  tmp=BT.find(5);
-  std::cout << "The node with key 5 has value: "<< tmp.val() << std::endl;
-  
+  //BT.clean();
+  BT.graph_print();
   return 0;
 }
