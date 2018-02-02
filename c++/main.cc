@@ -34,13 +34,6 @@ int main(){
   // std::cout << "Beccati questo const iterator: " << (*tmp2).first << std::endl;
 
   //BT.clean();
-  BT.naive_print();
-  std::cout << "\nThe node with key 10 has value: "<< BT[10] << std::endl;
-  BT.erase(10);
-  BT.print();
-  std::cout << "The node with key 10 has value: "<< BT[10] << std::endl;
-  BT[10] = -1;
-  std::cout << "The node with key 10 has value: "<< BT[10] << std::endl;
   BT.graph_print();
   return 0;
 }

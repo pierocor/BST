@@ -230,7 +230,7 @@ public:
     */
    Iterator find(const K key) const { return find(key,root); }
 
-  V & operator[] ( const K & key ) noexcept {
+  V & operator[] ( const K & key ) {
      Iterator it = find(key);
      if ( it.get() == nullptr ){    // PBM.PC exception?
        std::cout << "opss.. New node added!";
@@ -240,14 +240,14 @@ public:
    }
 
    ////////////////////// PBM.PC: come fa ad essere const se può aggiungere un nodo??
-   // const V & operator[]( const K & key ) const noexcept {
-   //  Iterator it = find(key);
-   //  if ( it.get() == nullptr ){
-   //    std::cout << "No node with this key";
-   //    it = insert( key, V{} );
-   //  }
-   //  return (*this)[ key ];
-   // }
+   const V & operator[]( const K & key ) const noexcept {
+    Iterator it = find(key);
+    if ( it.get() == nullptr ){
+      std::cout << "No node with this key";
+      return V{};
+    }
+    return (*this)[ key ];
+   }
 
    /**
     * @brief Left rotation of the tree centered on the node associated to the \p unique_ptr<Node> pointed by \p ptr (in the example: A).
@@ -307,7 +307,34 @@ public:
     }
     (*ptr).reset( ((*ptr)->left).release() );
   }
-
+//////////////////////////////////////// HERE PBM.PC WIP before next strategy 
+  // Node * release_left_sons( Node * ptr ){
+  //   while( (*ptr)->left != nullptr ){
+  //     ptr = ((*ptr)->left).release();
+  //   }
+  //   return ptr;
+  // }
+  // void release_left_subtree( Node * ptr ){
+  //   if( (*ptr)->left != nullptr ){
+  //     release_left_subtree(release_left_sons(ptr));
+  //   }
+  //
+  //   if( (*ptr)->right != nullptr ){
+  //     ((*ptr)->right).reset(release_left_sons((*ptr)->right));
+  //     // ((*ptr)->right).reset(release_left_sons(((*ptr)->right).release()));
+  //     release_left_subtree((*ptr)->right);
+  //   }
+  //   if( (*ptr)->godfather != nullptr ){
+  //     ((*ptr)->right).reset( (*ptr)->godfather );
+  //     release_left_subtree((*ptr)->right);
+  //   }
+  //   return;
+  // }
+  //
+  // void linked_list(){
+  //   release_left_subtree(& root);
+  // }
+////////////////////////////////////////
 };
 // PBM: DEBUG ONLY!
 template < typename K, typename V>
@@ -427,8 +454,8 @@ template < typename K, typename V>
       naive_print(ptr->left);
     if (ptr->right != nullptr )
       naive_print(ptr->right);
-    ptr->print();
-    // std::cout << (*this)[ ptr->_pair.first ] ;
+    // ptr->print();
+    std::cout << (*this)[ ptr->_pair.first ] ;
   }
 }
 
