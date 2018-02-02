@@ -92,29 +92,28 @@ public:
    * Adds iteratively a new node to the tree, defined by the values \p key and \p val. The insertion starts comparing the key from the node pointed by \p ptr and automatically updates the godfather of the new node in the variable \p parent. Returns an iterator (i.e. generalized pointer) to the newly added node.
    */
   Iterator insert(const K & key, const V & val, std::unique_ptr<Node> & ptr, Node *n){
-
     if (ptr == nullptr ){
       ptr.reset(new Node(key, val,nullptr,nullptr,n));
       ++_len;
       // root case
       if(_len==1){
-	this->_first=ptr.get();
-	this->_last=ptr.get();
+	       this->_first=ptr.get();
+	       this->_last=ptr.get();
       }else{
-	if(n==nullptr){
-	  ptr->_prev=this->_last;
-	  (ptr->_prev)->_next=ptr.get();
-	  this->_last=ptr.get();	  
-	}else{
-	  ptr->_prev=n->_prev;
-	  n->_prev=ptr.get();
-	  if(ptr->_prev==nullptr)
-	    ptr->_next=ptr.get();
-	  else
-	    this->_first=ptr.get();
-	}
+	      if(n==nullptr){
+          ptr->_prev=this->_last;
+          (ptr->_prev)->_next=ptr.get();
+          this->_last=ptr.get();
+	      }else{
+      	  ptr->_prev=n->_prev;
+      	  n->_prev=ptr.get();
+      	  if(ptr->_prev!=nullptr)
+      	    (ptr->_prev)->_next=ptr.get();
+      	  else
+      	    this->_first=ptr.get();
+	      }
       }
-      
+
       return Iterator(ptr);
     }
     if( ptr->_pair.first > key ){
@@ -159,6 +158,23 @@ public:
       graph_print(ptr->left, s);
     }
   }
+  /**
+   * Find the \p unique_ptr<Node> pointing to the node with the desired \p key.
+   * If it is not found inside the tree it returns the pointer that would point to it if it would be insered.
+   */
+  std::unique_ptr<Node> * find_unique_ptr (const K key) {
+    std::unique_ptr<Node> * ptr{ &root };
+    while( (*ptr)->_pair.first != key && *ptr != nullptr ){
+      if( (*ptr) -> _pair.first > key ){
+        ptr = &((*ptr)->left);
+      }
+      else{
+        ptr = &((*ptr)->right);
+      }
+    }
+    return ptr;
+  }
+
 
   Iterator find(const K & key, const std::unique_ptr<Node> & ptr) const {
     if ( ptr == nullptr )
@@ -186,13 +202,7 @@ public:
   /**
    * Returns an iterator (i.e. generalized pointer) to the first node of the tree, that is the node with the lowest key value.
    */
-  Iterator begin() const{
-    Node *tmp{root.get()};
-    while(tmp->left!=nullptr){
-      tmp=(tmp->left).get();
-    }
-    return Iterator(tmp);
-  }
+  Iterator begin() const{ return Iterator(this->_first); }
   /**
    * Returns an null iterator (i.e. generalized pointer) in order to determine out of bound access to the tree.
    */
@@ -310,26 +320,22 @@ public:
    * its father with its left son.
    */
 
-  void erase(const K key) {
+  void erase(const K key) noexcept {
     std::unique_ptr<Node> * ptr{ &root };
-    while( (*ptr)->_pair.first != key && *ptr != nullptr ){
-      if( (*ptr) -> _pair.first > key ){
-        ptr = &((*ptr)->left);
-      }
-      else{
-        ptr = &((*ptr)->right);
-      }
-    }
-    if ( *ptr == nullptr ){   // PBM.PC: non ha trovato la key. exception?
-      std::cout << "There is no node with the desired key.";
+    ptr = find_unique_ptr( key );
+    if ( *ptr == nullptr ){
+      std::cout << "There is no node with key "<< key <<".\n";
       return;
     }
-    while( (*ptr) -> right != nullptr ){ // Finché quello che voglio eliminare ha qualcosa a dx,
+    Node * to_be_erased = (*ptr).get() ;
+    (to_be_erased->_prev)->_next = to_be_erased->_next;
+    (to_be_erased->_next)->_prev = to_be_erased->_prev;
+    while( (*ptr)->right != nullptr ){ // Finché quello che voglio eliminare ha qualcosa a dx,
       rotate_left(ptr);
     }
     (*ptr).reset( ((*ptr)->left).release() );
   }
-//////////////////////////////////////// HERE PBM.PC WIP before next strategy 
+//////////////////////////////////////// HERE PBM.PC WIP before next strategy
   // Node * release_left_sons( Node * ptr ){
   //   while( (*ptr)->left != nullptr ){
   //     ptr = ((*ptr)->left).release();
@@ -374,9 +380,13 @@ void Tree<K,V>::Node::full_print() const {
   else
     std::cout << "NONE";
   if(_next==nullptr)
-    std::cout << "\t GP: nullptr" << std::endl;
+    std::cout << "\t next: nullptr" << std::endl;
   else
-    std::cout << "\t GP: key " << (*_next)._pair.first << std::endl;
+    std::cout << "\t next: key " << (*_next)._pair.first << std::endl;
+  if(_prev==nullptr)
+    std::cout << "\t prev: nullptr" << std::endl;
+  else
+    std::cout << "\t prev: key " << (*_prev)._pair.first << std::endl;
 }
 
 template < typename K, typename V>
@@ -426,15 +436,8 @@ template <typename K, typename V>
    * Pre-increment operator: moves the iterator to the next element in the tree.
    */
   Iterator& operator++() {
-    if(current->right != nullptr){
-      current = (current->right).get();
-      while ( (current->left).get() != nullptr )
-        current = (current->left).get();
-	    return *this;
-    }else{
-	    current = current->godfather;
-	    return *this;
-    }
+    current = current->_next;
+    return *this;
   };
 
   /**
@@ -477,8 +480,7 @@ template < typename K, typename V>
       naive_print(ptr->left);
     if (ptr->right != nullptr )
       naive_print(ptr->right);
-    // ptr->print();
-    std::cout << (*this)[ ptr->_pair.first ] ;
+    ptr->full_print();
   }
 }
 
