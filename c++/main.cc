@@ -35,5 +35,8 @@ int main(){
 
   //BT.clean();
   BT.graph_print();
+
+  std::cout << "last has key: " << BT.last_key() << std::endl;
+  
   return 0;
 }

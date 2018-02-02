@@ -26,14 +26,15 @@ private:
     std::pair<K,V> _pair;   // PBM.PC : K to be replaced by const K ?
     std::unique_ptr<Node> left;
     std::unique_ptr<Node> right;
-    Node *godfather;
+    Node *_next;
+    Node *_prev;
 
     /**
      * Node Constructor. Takes \p key for the key and \p val for the
      * value. Optionally the children and the godfather (i.e. the first "left" ancestor) can be specified.
      */
-  Node(const K & key, const V & val, Node * l = nullptr, Node * r = nullptr, Node * g = nullptr) :
-    _pair{key, val}, left{l}, right{r}, godfather{g} {};
+  Node(const K & key, const V & val, Node * l = nullptr, Node * r = nullptr, Node * n = nullptr) :
+    _pair{key, val}, left{l}, right{r}, _next{n}, _prev{nullptr} {};
     // PBM: What if l or r are already assigned to other unique_ptrs?
     /**
      * Prints the key, value and children's keys of a node.
@@ -57,9 +58,11 @@ private:
   };
   std::unique_ptr<Node> root;
   size_t _len;
+  Node *_first;
+  Node *_last;
 
 public:
- Tree() : root{nullptr}, _len{0} {};
+ Tree() : root{nullptr}, _len{0}, _first{nullptr}, _last{nullptr} {};
 
   class Iterator;
   class ConstIterator;
@@ -85,24 +88,42 @@ public:
    else
      return last((ptr->right).get());
   }
-
     /**
    * Adds iteratively a new node to the tree, defined by the values \p key and \p val. The insertion starts comparing the key from the node pointed by \p ptr and automatically updates the godfather of the new node in the variable \p parent. Returns an iterator (i.e. generalized pointer) to the newly added node.
    */
-  Iterator insert(const K & key, const V & val, std::unique_ptr<Node> & ptr, Node *parent){
+  Iterator insert(const K & key, const V & val, std::unique_ptr<Node> & ptr, Node *n){
 
     if (ptr == nullptr ){
-      ptr.reset(new Node(key, val,nullptr,nullptr,parent));
+      ptr.reset(new Node(key, val,nullptr,nullptr,n));
       ++_len;
+      // root case
+      if(_len==1){
+	this->_first=ptr.get();
+	this->_last=ptr.get();
+      }else{
+	if(n==nullptr){
+	  ptr->_prev=this->_last;
+	  (ptr->_prev)->_next=ptr.get();
+	  this->_last=ptr.get();	  
+	}else{
+	  ptr->_prev=n->_prev;
+	  n->_prev=ptr.get();
+	  if(ptr->_prev==nullptr)
+	    ptr->_next=ptr.get();
+	  else
+	    this->_first=ptr.get();
+	}
+      }
+      
       return Iterator(ptr);
     }
     if( ptr->_pair.first > key ){
-      parent=ptr.get();
-      return insert(key, val, ptr->left,parent);
+      n=ptr.get();
+      return insert(key, val, ptr->left,n);
     }
     if( ptr->_pair.first < key ){
-      parent=ptr->godfather;
-      return insert(key, val, ptr->right,parent);
+      n=ptr->_next;
+      return insert(key, val, ptr->right,n);
     }
     if( ptr->_pair.first == key ){
       ptr->_pair.second = val;  // PBM: up to us
@@ -159,8 +180,8 @@ public:
   /**
    * Returns an iterator (i.e. generalized pointer) to the last node of the tree, where the ordered is specified by the key value.
    */
-  Iterator last() const{
-    return last(root.get());
+  K& last_key() const{
+    return ((this->_last)->_pair).first;
   }
   /**
    * Returns an iterator (i.e. generalized pointer) to the first node of the tree, that is the node with the lowest key value.
@@ -288,6 +309,7 @@ public:
    * till it has no right son. At this point it can be erased connecting
    * its father with its left son.
    */
+
   void erase(const K key) {
     std::unique_ptr<Node> * ptr{ &root };
     while( (*ptr)->_pair.first != key && *ptr != nullptr ){
@@ -335,6 +357,7 @@ public:
   //   release_left_subtree(& root);
   // }
 ////////////////////////////////////////
+
 };
 // PBM: DEBUG ONLY!
 template < typename K, typename V>
@@ -350,10 +373,10 @@ void Tree<K,V>::Node::full_print() const {
     std::cout << right->_pair.first;
   else
     std::cout << "NONE";
-  if(godfather==nullptr)
+  if(_next==nullptr)
     std::cout << "\t GP: nullptr" << std::endl;
   else
-    std::cout << "\t GP: key " << (*godfather)._pair.first << std::endl;
+    std::cout << "\t GP: key " << (*_next)._pair.first << std::endl;
 }
 
 template < typename K, typename V>
