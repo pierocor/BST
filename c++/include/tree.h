@@ -191,7 +191,7 @@ public:
       return Iterator(ptr);
     }
     if( ptr->_pair.first > key ){
-      return find(key,ptr->left);
+     return find(key,ptr->left);
     }
     if( ptr->_pair.first < key ){
       return find(key,ptr->right);
@@ -522,9 +522,28 @@ template < typename K, typename V>
   }
 }
 
+// copy ctr
 template<typename K, typename V>
   Tree:: Tree(const Tree& in): root{(Insert(((in.root)->_pair).first,((in.root)->_pair).second,nullptr)).get()}, _len{in._len}, _first{nullptr}, _last{nullptr} {
-    ;
+    Node *tmp{root.get()};
+    this->insert((tmp->left)->_pair.first,(tmp->left)->_pair.second);
+    this->insert((tmp->right)->_pair.first,(tmp->right)->_pair.second);
+
+    while(tmp!=nullptr){
+      //work here
+      if (ptr->_pair.first == key ){
+	return Iterator(ptr);
+      }
+      if( ptr->_pair.first > key ){
+	return find(key,ptr->left);
+      }
+      if( ptr->_pair.first < key ){
+	return find(key,ptr->right);
+      }
+      
+    }
+
+																		 }
 
 }
 
