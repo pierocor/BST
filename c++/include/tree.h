@@ -69,8 +69,16 @@ public:
   Tree& operator=(const Tree&);
 
   //Move constructor
-  Tree(Tree&&);
-  Tree& operator=(Tree&&);
+  Tree(Tree&& in) noexcept
+    : root{std::move(in.root)}, _len{std::move(in._len)}, _first{std::move(in._first)}, _last{std::move(in._last)} {}
+
+  Tree& operator=(Tree&& in) noexcept {
+    root=std::move(in.root);
+    _len=std::move(in._len);
+    _first=std::move(in._first);
+    _last=std::move(in._last);
+    return *this;
+  }
   
   class Iterator;
   class ConstIterator;
@@ -121,7 +129,6 @@ public:
       	    this->_first=ptr.get();
 	      }
       }
-
       return Iterator(ptr);
     }
     if( ptr->_pair.first > key ){
@@ -227,6 +234,19 @@ public:
     balance(tmp->right, ptr->_next, N - N/2 - 1);
   }
 
+  void copy(const Tree &in){
+
+    Node *ptr{(in.root).get()};
+    
+    if(ptr==nullptr){
+      return;
+    }
+    this->insert(ptr->_pair.first,ptr->_pair.second);
+    copy(ptr->left.get());
+    copy(ptr->right.get());
+        
+  }
+  
 
   /***********************************************************************************************************************************************************************************************************/
  public:
@@ -378,6 +398,19 @@ public:
     release_subtree(root);
     balance( root, _first, _len);
   }
+
+  void copy(Node *ptr){
+
+    if(ptr==nullptr){
+      return;
+    }
+    this->insert(ptr->_pair.first,ptr->_pair.second);
+    copy(ptr->left.get());
+    copy(ptr->right.get());
+        
+  }
+
+
 //////////////////////////////////////// HERE PBM.PC WIP before next strategy
   // Node * release_left_sons( Node * ptr ){
   //   while( (*ptr)->left != nullptr ){
@@ -470,6 +503,7 @@ template <typename K, typename V>
       return false;
   }
 
+  
   /**
    * Pre-increment operator: moves the iterator to the next element in the tree.
    */
@@ -524,32 +558,18 @@ template < typename K, typename V>
 
 // copy ctr
 template<typename K, typename V>
-  Tree:: Tree(const Tree& in): root{(Insert(((in.root)->_pair).first,((in.root)->_pair).second,nullptr)).get()}, _len{in._len}, _first{nullptr}, _last{nullptr} {
-    Node *tmp{root.get()};
-    this->insert((tmp->left)->_pair.first,(tmp->left)->_pair.second);
-    this->insert((tmp->right)->_pair.first,(tmp->right)->_pair.second);
+  Tree<K,V>::Tree(const Tree& in):  root{nullptr}, _len{0}, _first{nullptr}, _last{nullptr}
+ {
+   this->copy(in);
+ }
 
-    while(tmp!=nullptr){
-      //work here
-      if (ptr->_pair.first == key ){
-	return Iterator(ptr);
-      }
-      if( ptr->_pair.first > key ){
-	return find(key,ptr->left);
-      }
-      if( ptr->_pair.first < key ){
-	return find(key,ptr->right);
-      }
-      
-    }
+// copy assignment
+template<typename K, typename V>
+   Tree<K,V>& Tree<K,V>::operator=(const Tree& in){
 
-																		 }
+  this->copy(in);
+  return *this;
 
 }
-
- Tree() :  {};
-
-
-
 
 #endif
