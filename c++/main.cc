@@ -5,8 +5,15 @@
 #define SEED time(NULL)
 #endif
 
+template<typename K>
+struct comp{
+  bool operator() (const K &  a, const K & b){
+    return a < b;
+  }
+};
+
 int main(){
-  Tree<int, int> BT{};
+  Tree<int, int, comp<int> > BT{};
   //BT.naive_print();
   srand (SEED);
   BT.insert( 5, -1);
@@ -37,6 +44,6 @@ int main(){
   BT.print();
   std::cout << "last has key: " << BT.last_key() << "\nfirst has key: " << (*(BT.begin())).first << std::endl;
 
-  
+
   return 0;
 }

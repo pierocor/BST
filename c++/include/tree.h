@@ -18,7 +18,7 @@ namespace std{
 /**
  * Class for binary trees.
  */
-template < typename K, typename V>
+template < typename K, typename V, typename OP >
 class Tree{
 private:
   class Node {
@@ -60,6 +60,7 @@ private:
   size_t _len;
   Node *_first;
   Node *_last;
+  OP c_op;
 
 public:
  Tree() : root{nullptr}, _len{0}, _first{nullptr}, _last{nullptr} {};
@@ -131,11 +132,11 @@ public:
       }
       return Iterator(ptr);
     }
-    if( ptr->_pair.first > key ){
+    if( c_op(key, ptr->_pair.first) ){
       n=ptr.get();
       return insert(key, val, ptr->left,n);
     }
-    if( ptr->_pair.first < key ){
+    if( c_op(ptr->_pair.first, key) ){
       n=ptr->_next;
       return insert(key, val, ptr->right,n);
     }
@@ -180,7 +181,7 @@ public:
   std::unique_ptr<Node> * find_unique_ptr (const K key) {
     std::unique_ptr<Node> * ptr{ &root };
     while( (*ptr)->_pair.first != key && *ptr != nullptr ){
-      if( (*ptr) -> _pair.first > key ){
+      if(  c_op ( key, (*ptr)->_pair.first) ){
         ptr = &((*ptr)->left);
       }
       else{
@@ -197,10 +198,10 @@ public:
     if (ptr->_pair.first == key ){
       return Iterator(ptr);
     }
-    if( ptr->_pair.first > key ){
+    if(  c_op(key, ptr->_pair.first) ){
      return find(key,ptr->left);
     }
-    if( ptr->_pair.first < key ){
+    if( c_op( ptr->_pair.first, key) ){
       return find(key,ptr->right);
     }
     return Iterator(nullptr); // PBM.PC Exception? it isn't needed, but wo there's a warning
@@ -237,16 +238,16 @@ public:
   void copy(const Tree &in){
 
     Node *ptr{(in.root).get()};
-    
+
     if(ptr==nullptr){
       return;
     }
     this->insert(ptr->_pair.first,ptr->_pair.second);
     copy(ptr->left.get());
     copy(ptr->right.get());
-        
+
   }
-  
+
 
   /***********************************************************************************************************************************************************************************************************/
  public:
@@ -407,7 +408,7 @@ public:
     this->insert(ptr->_pair.first,ptr->_pair.second);
     copy(ptr->left.get());
     copy(ptr->right.get());
-        
+
   }
 
 
@@ -442,8 +443,8 @@ public:
 
 };
 // PBM: DEBUG ONLY!
-template < typename K, typename V>
-void Tree<K,V>::Node::full_print() const {
+template < typename K, typename V, typename OP>
+void Tree<K,V,OP>::Node::full_print() const {
   std::cout << "key: " << _pair.first << "\t value: "
     <<  _pair.second << "\t left son: ";
   if ( left != nullptr )
@@ -465,14 +466,14 @@ void Tree<K,V>::Node::full_print() const {
     std::cout << "\t prev: key " << (*_prev)._pair.first << std::endl;
 }
 
-template < typename K, typename V>
-void Tree<K,V>::Node::print() const {
+template < typename K, typename V, typename OP>
+void Tree<K,V,OP>::Node::print() const {
   std::cout << _pair;
 }
 
-template <typename K, typename V>
-  class Tree<K,V>::Iterator {
-  using Node = Tree<K,V>::Node;
+template <typename K, typename V, typename OP>
+  class Tree<K,V,OP>::Iterator {
+  using Node = Tree<K,V,OP>::Node;
   Node *current;
 
  public:
@@ -503,7 +504,7 @@ template <typename K, typename V>
       return false;
   }
 
-  
+
   /**
    * Pre-increment operator: moves the iterator to the next element in the tree.
    */
@@ -534,17 +535,17 @@ template <typename K, typename V>
 
 };
 
-template < typename K, typename V>
-class Tree<K,V>::ConstIterator : public Tree<K,V>::Iterator {
-  using parent = Tree<K,V>::Iterator;
+template < typename K, typename V, typename OP>
+class Tree<K,V,OP>::ConstIterator : public Tree<K,V,OP>::Iterator {
+  using parent = Tree<K,V,OP>::Iterator;
  public:
   using parent::Iterator; // PBM: ask alberto
   const V& operator*() const { return parent::operator*(); }
 };
 
 /* Extra stuff */
-template < typename K, typename V>
-  void Tree<K,V>::naive_print( const std::unique_ptr<Node> & ptr) const {
+template < typename K, typename V, typename OP>
+  void Tree<K,V,OP>::naive_print( const std::unique_ptr<Node> & ptr) const {
   if(ptr==nullptr){
     std::cout << "The tree is empty." << std::endl;
   }else{
@@ -557,15 +558,15 @@ template < typename K, typename V>
 }
 
 // copy ctr
-template<typename K, typename V>
-  Tree<K,V>::Tree(const Tree& in):  root{nullptr}, _len{0}, _first{nullptr}, _last{nullptr}
+template<typename K, typename V, typename OP>
+  Tree<K,V,OP>::Tree(const Tree& in):  root{nullptr}, _len{0}, _first{nullptr}, _last{nullptr}
  {
    this->copy(in);
  }
 
 // copy assignment
-template<typename K, typename V>
-   Tree<K,V>& Tree<K,V>::operator=(const Tree& in){
+template<typename K, typename V, typename OP>
+   Tree<K,V,OP>& Tree<K,V,OP>::operator=(const Tree& in){
 
   this->copy(in);
   return *this;
