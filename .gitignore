@@ -5,3 +5,5 @@ Makefile
 c++/html/*
 c++/latex/*
 .DS*
+a.out
+
