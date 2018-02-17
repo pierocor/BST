@@ -7,7 +7,7 @@
 
 template<typename K>
 struct comp{
-  bool operator() (const K &  a, const K & b){
+  bool operator() (const K &  a, const K & b) const {
     return a < b;
   }
 };
@@ -25,25 +25,32 @@ int main(){
     BT.insert( rand()%30, rand()%100 );
   }
   BT.graph_print();
+  std::cout << "Voila 15 " << *(BT.find(15)) << std::endl;
   std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
   BT.naive_print();
   BT.print();
-  std::cout << "last has key: " << BT.last_key() << "\nfirst has key: " << (*(BT.begin())).first << std::endl;
+
+  BT.rotate_left(10);
+  BT.graph_print();
+  std::cout << "Voila 15 " << *(BT.find(15)) << std::endl;
+  std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
+  BT.naive_print();
+  BT.print();
 
   BT.erase(10);
   BT.graph_print();
+  std::cout << "Voila 15 " << *(BT.find(15)) << std::endl;
   std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
   BT.naive_print();
   BT.print();
-  std::cout << "last has key: " << BT.last_key() << "\nfirst has key: " << (*(BT.begin())).first << std::endl;
 
   BT.balance();
   BT.graph_print();
+  std::cout << "Voila 15 " << *(BT.find(15)) << std::endl;
   std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
   BT.naive_print();
   BT.print();
-  std::cout << "last has key: " << BT.last_key() << "\nfirst has key: " << (*(BT.begin())).first << std::endl;
 
-
+  BT.clean();
   return 0;
 }
