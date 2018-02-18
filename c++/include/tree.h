@@ -106,6 +106,11 @@ public: // ************************* PUBLIC *************************
    */
   Iterator begin() const{ return Iterator(this->_first); }
   /**
+   * Returns an iterator (i.e. generalized pointer) to the last node of the
+   * tree, that is the node with the highest key value.
+   */
+  Iterator last() const{ return Iterator(this->_last); }
+  /**
    * Returns an null iterator (i.e. generalized pointer) in order to determine
    * out of bound access to the tree.
    */
@@ -115,6 +120,11 @@ public: // ************************* PUBLIC *************************
    * of the tree, that is the node with the lowest key value.
    */
   ConstIterator cbegin() const { return ConstIterator{(this->begin()).get()}; }
+  /**
+   * Returns a constant iterator (i.e. generalized pointer) to the last node
+   * of the tree, that is the node with the lowest key value.
+   */
+  ConstIterator clast() const { return ConstIterator{(this->last()).get()}; }
   /**
    * Returns a null iterator (i.e. generalized pointer) in order to determine
    * out of bound access to the tree.
@@ -521,6 +531,22 @@ public:
   Iterator operator++(int) {
     Iterator it{current};
     ++(*this);
+    return it;
+  }
+  /**
+   * Pre-decrement operator: moves the iterator to the previous element.
+   */
+  Iterator& operator--() {
+    current = current->_prev;
+    return *this;
+  };
+  /**
+   * Post-decrement operator: moves the iterator to the previous element in the
+   * tree, returns an iterator to the current node.
+   */
+  Iterator operator--(int) {
+    Iterator it{current};
+    --(*this);
     return it;
   }
   /**

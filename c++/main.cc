@@ -29,25 +29,10 @@ int main(){
   std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
   BT.print();
 
-  T = BT;
-  T.rotate_left(10);
-  T.graph_print();
-  std::cout << "The tree T has " << T.len() << " nodes!" << std::endl;
-  T.print();
-
-  Tree<int, int, comp<int> > T2{BT};
-  T2.erase(10);
-  T2.graph_print();
-  std::cout << "The tree has " << T2.len() << " nodes!" << std::endl;
-  T2.print();
-
-  BT.balance();
-  BT.graph_print();
-  std::cout << "Voila 15 " << *(BT.find(15)) << std::endl;
-  std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
-  BT.print();
-  BT.naive_print();
-
+  for (Tree<int, int, comp<int> >::Iterator it = BT.last(); it != BT.end(); --it) {
+    std::cout << *it << " ";
+  }
+  std::cout << std::endl;
   BT.clean();
   return 0;
 }
