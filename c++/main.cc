@@ -5,6 +5,28 @@
 #define SEED time(NULL)
 #endif
 
+#include <vector>
+#define MAX_SIZE 100000
+#define STEP 5000
+#define NLOOK 10000000
+
+#include <time.h>
+#include <ctype.h>
+#include <sys/types.h>
+#include <sys/time.h>
+
+
+double cclock()
+  /* Returns elepsed seconds past from the last call to timer rest */
+{
+
+    struct timeval tmp;
+    double sec;
+    gettimeofday( &tmp, (struct timezone *)0 );
+    sec = tmp.tv_sec + ((double)tmp.tv_usec)/1000000.0;
+    return sec;
+}
+
 template<typename K>
 struct comp{
   bool operator() (const K &  a, const K & b) const {
@@ -13,26 +35,34 @@ struct comp{
 };
 
 int main(){
+  double t_start, t_stop;
+  std::vector<int> keys;
+  size_t size, i, j;
   Tree<int, int, comp<int> > BT{}, T;
-  //BT.naive_print();
+  int tmp;
   srand (SEED);
-  BT.insert( 5, -1);
-  for ( int i = 0; i < 10; ++i ){
-    BT.insert( rand()%20, rand()%100 );
+  for ( i = 0; i < MAX_SIZE; ++i ){ // ordered vector
+    keys.push_back(i);
   }
-  BT.insert(10, -1);
-  for ( int i = 0; i < 10; ++i ){
-    BT.insert( rand()%30, rand()%100 );
-  }
-  BT.graph_print();
-  std::cout << "Voila 15 " << *(BT.find(15)) << std::endl;
-  std::cout << "The tree has " << BT.len() << " nodes!" << std::endl;
-  BT.print();
+  for (size = STEP; size < MAX_SIZE; size += STEP ){
+    for ( i = 0; i < size; ++i ){ // shuffle!
+      j = rand()%(size - i) + i;
+      tmp = keys[i];
+      keys[i] = keys[j];
+      keys[j] = tmp;
+    }
 
-  for (Tree<int, int, comp<int> >::Iterator it = BT.last(); it != BT.end(); --it) {
-    std::cout << *it << " ";
+    for ( i = 0; i < size; ++i ){
+      BT.insert( keys[i], rand()%100 );
+    }
+
+    t_start=cclock();
+    for ( i = 0; i < NLOOK; ++i ){
+      BT.find2( keys[ rand()%size ] );
+    }
+    t_stop=cclock();
+    std::cout << "size: " << size << "\tNLOOK: " << NLOOK << " in " << t_stop - t_start << " sec.\n";
+    BT.clean();
   }
-  std::cout << std::endl;
-  BT.clean();
   return 0;
 }

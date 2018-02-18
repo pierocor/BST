@@ -145,6 +145,7 @@ public: // ************************* PUBLIC *************************
    * If the node does not exist it returns \p nullptr.
    */
   Iterator find(const K key) const { return find(key,root); }
+  Iterator find2(const K key) { return Iterator{find_uptr(key,root)}; }
   /**
    * Returns the value of the node with key \p key.
    * If the node does not exist it insert a new node with default value.
