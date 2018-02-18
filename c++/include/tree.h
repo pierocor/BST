@@ -6,7 +6,7 @@
 #include <string>
 #include <iostream>
 
-
+/* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv  STD vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
 namespace std{
   /**
    * Overload of \p operator<< for \p std::pair
@@ -17,49 +17,20 @@ namespace std{
 		return strm;
 	}
 }
+/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  STD ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
+/* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv TREE vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
 /**
  * Class for binary trees.
  */
 template < typename K, typename V, typename OP >
 class Tree{
 private: // ************************* PRIVATE *************************
-  class Node {
-  public:
-    std::pair<const K,V> _pair;
-    std::unique_ptr<Node> left;
-    std::unique_ptr<Node> right;
-    Node *_next;
-    Node *_prev;
-
-    /**
-     * Node Constructor. Takes \p key for the key and \p val for the
-     * value. Optionally the next (i.e. the first "left" ancestor) can be specified.
-     */
-    Node(const K & key, const V & val, Node * n = nullptr) :
-      _pair{key, val},
-      left{nullptr},
-      right{nullptr},
-      _next{n},
-      _prev{nullptr}
-      {};
-
-    /**
-     * Prints the key and the value of the node.
-     */
-    void print() const;
-
-    /**
-     * Prints key, value, children's keys, next and prev keys of a node.
-     */
-    void full_print() const;
-  };
-
+  class Node;
   std::unique_ptr<Node> root;
   size_t _len;
   Node *_first;
   Node *_last;
   OP c_op;
-
 public: // ************************* PUBLIC *************************
   /* ______________________________ CTORS ______________________________ */
   /**
@@ -69,7 +40,7 @@ public: // ************************* PUBLIC *************************
   /**
    * Tree copy constructor.
    */
-  Tree(const Tree& in){ this->copy(in); }
+  Tree(const Tree& in){ this->copy((in.root).get()); }
   /**
    * Tree move constructor.
    */
@@ -83,7 +54,7 @@ public: // ************************* PUBLIC *************************
    * Tree copy assignment.
    */
   Tree& operator=(const Tree& in){
-    this->copy(in);
+    this->copy((in.root).get());
     return *this;
   }
   /**
@@ -176,7 +147,7 @@ public: // ************************* PUBLIC *************************
   const V & operator[]( const K & key ) const noexcept ;
   /* ______________________________ MODIFY ______________________________ */
   /**
-   * @brief Left rotation of the tree centered on the node with key \p key (A).
+   * Left rotation of the tree centered on the node with key \p key (A).
    *
    * @code
    * ptr -> \
@@ -184,11 +155,11 @@ public: // ************************* PUBLIC *************************
    *         |       |
    *         t1      t2
    * @endcode
-   * 1. \p *ptr is released and its value stored on a temporary pointer to \p Node.
-   * 2. The right son of A (->B) is released, thus \p *ptr can be associeted to B.
-   * 3. The left son of B (->t2) is released and stored as right son of A.
-   * 4. A can be stored as left son of B.
-   * 5. \p ptr is updated, it points now to the left son of B (->A).
+   * 1. release \p *ptr, store its value on a temporary pointer to \p Node.
+   * 2. Release the right son of A (->B) and associate \p *ptr to B.
+   * 3. Release the left son of B (->t2) and store it as right son of A.
+   * 4. Store A as left son of B.
+   * 5. Update \p ptr in order to point to the left son of B (->A).
    *
    * @code
    *     \
@@ -207,132 +178,35 @@ public: // ************************* PUBLIC *************************
 
  private: // ************************* PRIVATE *************************
   /* ______________________________ PRINT ______________________________ */
-  /** Recursive function to implement naive print.*/
+  /** Recursive function used to implement naive print.*/
   void naive_print( const std::unique_ptr<Node> & ptr) const;
 
-  /** Recursive function to implement the graph print.*/
+  /** Recursive function used to implement the graph print.*/
   void graph_print( const std::unique_ptr<Node> & ptr, std::string & s) const;
   /* ______________________________ INSERT ______________________________ */
-  /** Recursive function to implement insertion.*/
-  Iterator insert(const K & key, const V & val, std::unique_ptr<Node> & ptr, Node *n);
+  /** Recursive function used to implement insertion.*/
+  Iterator
+  insert(const K & key, const V & val, std::unique_ptr<Node> & ptr, Node *n);
   /* ______________________________ FIND ______________________________ */
   /** Find the \p unique_ptr<Node> pointing to the node with the desired \p key.
    * If it is not found inside the tree it returns the pointer that would point
    * to it if it would be insered.*/
-  std::unique_ptr<Node> & find_uptr (const K key, std::unique_ptr<Node> & ptr) const;
-
+  std::unique_ptr<Node> &
+  find_uptr (const K key, std::unique_ptr<Node> & ptr) const;
+  /** Recursive function used to implement find.*/
   Iterator find(const K & key, const std::unique_ptr<Node> & ptr) const;
   /* ______________________________ MODIFY ______________________________ */
+  /** Left rotation.*/
   void rotate_left( std::unique_ptr<Node> * & ptr );
-  /**
-   * Release all the unique pointers of the sub-tree having \p ptr as root,
-   *  loosing permanently the tree strucutre.
-   */
+  /** Release all the unique pointers of the sub-tree having \p ptr as root.*/
   void release_subtree( std::unique_ptr<Node> & ptr );
-
+  /** Recursive function used to balance the tree.*/
   void balance( std::unique_ptr<Node> & ptr, Node * first, int N );
 
   void copy(Node *ptr);
-
-  void copy(const Tree &in){ copy((in.root).get()); }
 };
 
-
-template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::Node::print() const {
-  std::cout << _pair;
-}
-
-// DEBUG ONLY!
-template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::Node::full_print() const {
-  std::cout << "key: " << _pair.first << "\t value: "
-    <<  _pair.second << "\t left son: ";
-  if ( left != nullptr )
-    std::cout << left->_pair.first;
-  else
-    std::cout << "NONE";
-  std::cout <<  "\t right son: ";
-  if ( right != nullptr )
-    std::cout << right->_pair.first;
-  else
-    std::cout << "NONE";
-  if(_next==nullptr)
-    std::cout << "\t next: nullptr" << std::endl;
-  else
-    std::cout << "\t next: key " << (*_next)._pair.first << std::endl;
-  if(_prev==nullptr)
-    std::cout << "\t prev: nullptr" << std::endl;
-  else
-    std::cout << "\t prev: key " << (*_prev)._pair.first << std::endl;
-}
-
-
-template <typename K, typename V, typename OP>
-  class Tree<K,V,OP>::Iterator {
-  using Node = Tree<K,V,OP>::Node;
-  Node *current;
-
- public:
- Iterator(const std::unique_ptr<Node> &n) : current{n.get()} {}
- Iterator( Node *n): current{n} {}
-  /**
-   * Returns the key associated to node pointed by the current iterator.
-   */
-  std::pair<const K,V>& operator*() const { return current->_pair; }
-  /**
-   * Returns the value associated to node pointed by the current iterator.
-   */
-  V val(){ return (current->_pair).second; }
-
-  /**
-   * Returns a raw pointer to the node pointed by the current iterator.
-   */
-  Node *get() const { return current; }
-
-   /**
-   * Returns true if the iterator is pointing to the last element of th tree, else returns false.
-   */
-  bool islast(){
-    Node *tmp=this->get();
-    if(tmp->right==nullptr&&tmp->godfather==nullptr)
-      return true;
-    else
-      return false;
-  }
-
-
-  /**
-   * Pre-increment operator: moves the iterator to the next element in the tree.
-   */
-  Iterator& operator++() {
-    current = current->_next;
-    return *this;
-  };
-
-  /**
-   * Post-increment operator: moves the iterator to the next element in the tree, returns an iterator to the current node.
-   */
-  Iterator operator++(int) {
-    Iterator it{current};
-    ++(*this);
-    return it;
-  }
-
-  /**
-   * Returns true if two iterators point to the same node, false else.
-   */
-  bool operator==(const Iterator& other) {
-    return this->current == other.current;
-  }
-  /**
-   * Returns false if two iterators point to the same node, true else.
-   */
-  bool operator!=(const Iterator& other) { return !(*this == other); }
-
-};
-/* ______________________________ CTOR, CP, MV ______________________________ */
-
+/* ______________________________ COPY ______________________________ */
   template < typename K, typename V, typename OP>
   void Tree<K,V,OP>::copy(Node *ptr){
     if(ptr==nullptr){
@@ -342,7 +216,6 @@ template <typename K, typename V, typename OP>
     copy(ptr->left.get());
     copy(ptr->right.get());
   }
-
 
 /* ______________________________ DEALLOC ______________________________ */
 template < typename K, typename V, typename OP>
@@ -396,7 +269,8 @@ void Tree<K,V,OP>::graph_print() const {
 }
 
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::graph_print( const std::unique_ptr<Node> & ptr, std::string & s) const {
+void Tree<K,V,OP>::graph_print(
+const std::unique_ptr<Node> & ptr, std::string & s) const {
   if (ptr->right != nullptr ){
     std::cout.fill('-');
     std::cout.width(8);
@@ -418,8 +292,8 @@ void Tree<K,V,OP>::graph_print( const std::unique_ptr<Node> & ptr, std::string &
 
 /* ______________________________ INSERT ______________________________ */
 template < typename K, typename V, typename OP>
-typename Tree<K,V,OP>::Iterator
-Tree<K,V,OP>::insert(const K & key, const V & val, std::unique_ptr<Node> & ptr, Node *n){
+typename Tree<K,V,OP>::Iterator Tree<K,V,OP>::insert(
+const K & key, const V & val, std::unique_ptr<Node> & ptr, Node * n){
   if (ptr == nullptr ){
     ptr.reset(new Node(key, val, n));
     ++_len;
@@ -558,15 +432,115 @@ void Tree<K,V,OP>::rotate_left( std::unique_ptr<Node> * & ptr ){
   ptr = &((*ptr)->left);  //5.
 }
 
-/* ______________________________ IT ______________________________ */
+/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ TREE ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
+/* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv NODE vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
+template <typename K, typename V, typename OP>
+class Tree<K,V,OP>:: Node {
+public:
+  std::pair<const K,V> _pair;
+  std::unique_ptr<Node> left;
+  std::unique_ptr<Node> right;
+  Node *_next;
+  Node *_prev;
+  /**
+   * Node Constructor. Takes \p key for the key and \p val for the value.
+   * Optionally the next (i.e. the first "left" ancestor) can be specified.
+   */
+  Node(const K & key, const V & val, Node * n = nullptr) :
+    _pair{key, val}, left{nullptr}, right{nullptr}, _next{n}, _prev{nullptr} {};
+  /**
+   * Prints the key and the value of the node.
+   */
+  void print() const;
+  /**
+   * Prints key, value, children's keys, next and prev keys of a node.
+   */
+  void full_print() const;
+private:
+  void cond_print (Node * ptr) const;
+};
+
+template < typename K, typename V, typename OP>
+void Tree<K,V,OP>::Node::print() const {
+  std::cout << _pair;
+}
+
+template < typename K, typename V, typename OP>
+void Tree<K,V,OP>::Node::full_print() const {
+  std::cout << "key: " << _pair.first << "\tvalue: " <<  _pair.second
+  << "\tleft son: ";
+  cond_print(left.get());
+  std::cout <<  "\tright son: ";
+  cond_print(right.get());
+  std::cout << "\tnext: ";
+  cond_print(_next);
+  std::cout << "\tprev: ";
+  cond_print(_prev);
+  std::cout << std::endl;
+}
+
+template < typename K, typename V, typename OP>
+void Tree<K,V,OP>::Node::cond_print (Node * ptr) const{
+  std::cout.width(6);
+  std::cout.fill(' ');
+  if ( ptr != nullptr )
+    std::cout << std::right << ptr->_pair.first;
+  else
+    std::cout << std::right << "NONE";
+}
+
+/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ NODE ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
+/* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv ITERATOR vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
+template <typename K, typename V, typename OP>
+class Tree<K,V,OP>::Iterator {
+  using Node = Tree<K,V,OP>::Node;
+  Node *current;
+
+public:
+  Iterator(const std::unique_ptr<Node> &n) : current{n.get()} {}
+  Iterator( Node *n): current{n} {}
+  /**
+   * Returns the key associated to node pointed by the current iterator.
+   */
+  std::pair<const K,V>& operator*() const { return current->_pair; }
+  /**
+   * Returns a raw pointer to the node pointed by the current iterator.
+   */
+  Node * get() const { return current; }
+  /**
+   * Pre-increment operator: moves the iterator to the next element.
+   */
+  Iterator& operator++() {
+    current = current->_next;
+    return *this;
+  };
+  /**
+   * Post-increment operator: moves the iterator to the next element in the
+   * tree, returns an iterator to the current node.
+   */
+  Iterator operator++(int) {
+    Iterator it{current};
+    ++(*this);
+    return it;
+  }
+  /**
+   * Returns true if two iterators point to the same node, false else.
+   */
+  bool operator==(const Iterator& other) {
+    return this->current == other.current;
+  }
+  /**
+   * Returns false if two iterators point to the same node, true else.
+   */
+  bool operator!=(const Iterator& other) { return !(*this == other); }
+};
+/* ____________________________ CONSTITERATORS ____________________________ */
 template < typename K, typename V, typename OP>
 class Tree<K,V,OP>::ConstIterator : public Tree<K,V,OP>::Iterator {
   using parent = Tree<K,V,OP>::Iterator;
  public:
-  using parent::Iterator; // PBM: ask alberto
+  using parent::Iterator;
   const V& operator*() const { return parent::operator*(); }
 };
-
-
-
+/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ITERATOR ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
 #endif
