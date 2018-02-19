@@ -13,9 +13,20 @@
 
 #define log2MAXSIZE 20
 
+double cclock()
+  /* Returns elepsed seconds past from the last call to timer rest */
+{
+
+    struct timeval tmp;
+    double sec;
+    gettimeofday( &tmp, (struct timezone *)0 );
+    sec = tmp.tv_sec + ((double)tmp.tv_usec)/1000000.0;
+    return sec;
+}
+
 template<typename K>
 struct comp{
-  bool operator() (const K &  a, const K & b) const{
+  bool operator() (const K &  a, const K & b) const {
     return a < b;
   }
 };
@@ -91,5 +102,13 @@ int main(){
 
   std::cout << "tmp_val=" << tmp_value << std::endl;
 
+    t_start=cclock();
+    for ( i = 0; i < NLOOK; ++i ){
+      BT.find2( keys[ rand()%size ] );
+    }
+    t_stop=cclock();
+    std::cout << "size: " << size << "\tNLOOK: " << NLOOK << " in " << t_stop - t_start << " sec.\n";
+    BT.clean();
+  }
   return 0;
 }
