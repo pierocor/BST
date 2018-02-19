@@ -1,6 +1,6 @@
 EXE = exe.x
 CXX = g++
-CFLAGS = -I include -g -std=c++11 -Wall -Wextra -DSEED=0
+CFLAGS = -I include -g -std=c++11 -Wall -Wextra -DSEED=0 -O3
 
 SRC= main.cc src/tree.cc
 OBJ=$(SRC:.cc=.o)
