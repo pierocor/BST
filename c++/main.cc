@@ -41,6 +41,7 @@ double cclock()
 }
 
 int main(){
+<<<<<<< HEAD
   
   Tree<int, int, comp<int> > BT{};
   Tree<int,int,comp<int>>::Iterator Bit{nullptr};
@@ -74,6 +75,7 @@ int main(){
       BT.insert(test_inp[label].first,test_inp[label].second);
       test_inp.erase(test_inp.begin()+label);      
       pool-=1;      
+
     }
 
     // Lookups in BT
@@ -102,12 +104,14 @@ int main(){
 
   std::cout << "tmp_val=" << tmp_value << std::endl;
 
+
     t_start=cclock();
     for ( i = 0; i < NLOOK; ++i ){
-      BT.find2( keys[ rand()%size ] );
+      BT.find( keys[ i%size ] );
     }
     t_stop=cclock();
-    std::cout << "size: " << size << "\tNLOOK: " << NLOOK << " in " << t_stop - t_start << " sec.\n";
+    t_1 = t_stop - t_start;
+    std::cout << size << "\t" << t_1 << "\n";
     BT.clean();
   }
   return 0;
