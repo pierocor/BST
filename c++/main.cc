@@ -35,7 +35,7 @@ struct comp{
 };
 
 int main(){
-  double t_start, t_stop, t_1, t_2;
+  double t_start, t_stop, t_1;
   std::vector<int> keys;
   size_t size, i, j;
   Tree<int, int, comp<int> > BT{}, T;
@@ -63,20 +63,14 @@ int main(){
       keys[i] = keys[j];
       keys[j] = tmp;
     }
+
     t_start=cclock();
     for ( i = 0; i < NLOOK; ++i ){
       BT.find( keys[ i%size ] );
     }
     t_stop=cclock();
-
     t_1 = t_stop - t_start;
-    t_start=cclock();
-    for ( i = 0; i < NLOOK; ++i ){
-      BT.find2( keys[ i%size ] );
-    }
-    t_stop=cclock();
-    t_2 = t_stop - t_start;
-    std::cout << size << "\t" << t_1 << "\t" << t_2 << "\n";
+    std::cout << size << "\t" << t_1 << "\n";
     BT.clean();
   }
   return 0;

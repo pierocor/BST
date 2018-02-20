@@ -144,8 +144,7 @@ public: // ************************* PUBLIC *************************
    * Returns an iterator to the node with key \p key.
    * If the node does not exist it returns \p nullptr.
    */
-  Iterator find(const K key) const { return find(key,root); }
-  Iterator find2(const K key) { return Iterator{find_uptr(key,root)}; }
+  Iterator find(const K key) { return Iterator{find_uptr(key,root)}; }
   /**
    * Returns the value of the node with key \p key.
    * If the node does not exist it insert a new node with default value.
@@ -204,8 +203,6 @@ public: // ************************* PUBLIC *************************
    * to it if it would be insered.*/
   std::unique_ptr<Node> &
   find_uptr (const K key, std::unique_ptr<Node> & ptr) const;
-  /** Recursive function used to implement find.*/
-  Iterator find(const K & key, const std::unique_ptr<Node> & ptr) const;
   /* ______________________________ MODIFY ______________________________ */
   /** Left rotation.*/
   void rotate_left( std::unique_ptr<Node> * & ptr );
@@ -356,23 +353,6 @@ Tree<K,V,OP>::find_uptr(const K key, std::unique_ptr<Node> & ptr) const {
   if( c_op( ptr->_pair.first, key) )
     return find_uptr(key,ptr->right);
   return ptr;
-}
-
-template < typename K, typename V, typename OP>
-typename Tree<K,V,OP>::Iterator
-Tree<K,V,OP>::find(const K & key, const std::unique_ptr<Node> & ptr) const {
-  if ( ptr == nullptr )
-    return Iterator(nullptr);
-  if (ptr->_pair.first == key ){
-    return Iterator(ptr);
-  }
-  if(  c_op(key, ptr->_pair.first) ){
-   return find(key,ptr->left);
-  }
-  if( c_op( ptr->_pair.first, key) ){
-    return find(key,ptr->right);
-  }
-  return Iterator(nullptr);
 }
 
 template < typename K, typename V, typename OP>
