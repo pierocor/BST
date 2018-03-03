@@ -345,7 +345,7 @@ template < typename K, typename V, typename OP>
 std::unique_ptr<typename Tree<K,V,OP>::Node> &
 Tree<K,V,OP>::find_uptr(const K key, std::unique_ptr<Node> & ptr) const {
   if ( ptr == nullptr )
-    t_error("Cannot find key ",key);
+    return ptr;
   if (ptr->_pair.first == key )
     return ptr;
   if(  c_op(key, ptr->_pair.first) )
@@ -359,10 +359,10 @@ template < typename K, typename V, typename OP>
 V & Tree<K,V,OP>::operator[] ( const K & key ) {
    Iterator it = find(key);
    // PBM.LC: if we want find to return out-of-range error, the following if statement should be deleted. I think giving error back makes more sense.
-   /* if ( it.get() == nullptr ){ */
-   /*   std::cout << "New node added!"; */
-   /*   it = insert( key, V{} ); */
-   /* } */
+   if ( it.get() == nullptr ){
+     std::cout << "New node added!";
+     it = insert( key, V{} );
+   }
    return (*it).second;
 }
 
@@ -370,10 +370,9 @@ template < typename K, typename V, typename OP>
 const V & Tree<K,V,OP>::operator[]( const K & key ) const noexcept {
   Iterator it = find(key);
   // PBM.LC: if we want find to return out-of-range error, the following if statement should be deleted. I think giving error back makes more sense.
-  /* if ( it.get() == nullptr ){ */
-  /*   std::cout << "No node with this key"; */
-  /*   return V{}; */
-  /* } */
+  if ( it.get() == nullptr ){
+    t_error("Cannot find key ",key);
+  }
   return (*this)[ key ];
 }
 
@@ -503,8 +502,6 @@ public:
    * Pre-increment operator: moves the iterator to the next element.
    */
   Iterator& operator++() {
-    if(current->_next==nullptr)
-      t_error("Out of bound access.");
     current = current->_next;
     return *this;
   };
@@ -521,8 +518,6 @@ public:
    * Pre-decrement operator: moves the iterator to the previous element.
    */
   Iterator& operator--() {
-    if(current->_prev==nullptr)
-      t_error("Out of bound access.");   
     current = current->_prev;
     return *this;
   };
