@@ -5,6 +5,7 @@
 #include<iostream>
 #include <string>
 #include <iostream>
+#include <tree.err.h>
 
 /* vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv  STD vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv */
 namespace std{
@@ -305,7 +306,6 @@ const K & key, const V & val, std::unique_ptr<Node> & ptr, Node * n){
   if (ptr == nullptr ){
     ptr.reset(new Node(key, val, n));
     ++_len;
-    // root case
     if(_len==1){
        this->_first=ptr.get();
        this->_last=ptr.get();
@@ -358,6 +358,7 @@ Tree<K,V,OP>::find_uptr(const K key, std::unique_ptr<Node> & ptr) const {
 template < typename K, typename V, typename OP>
 V & Tree<K,V,OP>::operator[] ( const K & key ) {
    Iterator it = find(key);
+   // PBM.LC: if we want find to return out-of-range error, the following if statement should be deleted. I think giving error back makes more sense.
    if ( it.get() == nullptr ){
      std::cout << "New node added!";
      it = insert( key, V{} );
@@ -368,9 +369,9 @@ V & Tree<K,V,OP>::operator[] ( const K & key ) {
 template < typename K, typename V, typename OP>
 const V & Tree<K,V,OP>::operator[]( const K & key ) const noexcept {
   Iterator it = find(key);
+  // PBM.LC: if we want find to return out-of-range error, the following if statement should be deleted. I think giving error back makes more sense.
   if ( it.get() == nullptr ){
-    std::cout << "No node with this key";
-    return V{};
+    t_error("Cannot find key ",key);
   }
   return (*this)[ key ];
 }
@@ -390,7 +391,6 @@ void Tree<K,V,OP>::balance( std::unique_ptr<Node> & ptr, Node * first, int N ){
   for ( int i = 0; i < N/2; ++i ){
     tmp = tmp->_next;
   }
-  std::cout << N << ":" << tmp->_pair << " ";
   ptr.reset(tmp);
   balance(tmp->left, first, N/2);
   balance(tmp->right, ptr->_next, N - N/2 - 1);
