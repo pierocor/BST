@@ -72,7 +72,7 @@ public: // ************************* PUBLIC *************************
   /**
    * Removes every node in the tree.
    */
-  void clean(){ root.reset(nullptr); _len = 0; }
+  void clean() noexcept { root.reset(nullptr); _len = 0; }
   /**
    * Delete the node with key \p key. This function performs left rotations on
    * the tree centered on the selected node till it has no right son.
@@ -83,21 +83,25 @@ public: // ************************* PUBLIC *************************
   /**
    * Returns the length of the tree.
    */
-  size_t len() const { return _len; }
+  size_t len() const noexcept { return _len; }
   /* ______________________________ PRINT ______________________________ */
   /**
-   * Prints \p key:value of each node oredered by key via a recursive function.
+   * Prints \p key:value of each node oredered by key.
    */
-  void print() const;
+  void print() const noexcept;
   /**
    * Using /p Node::full_print(), it prints all the informations about
    * the nodes of the tree to stdout via a recursive function.
    */
-  void naive_print() const;
+  void naive_print() const noexcept;
   /**
    * Prints the tree as a graph. It works fine with keys up to 8 digits.
    */
-  void graph_print() const;
+  void graph_print() const noexcept;
+  /**
+   * Prints the value associated to a key.
+   */
+  void print_value( const K & key ) const noexcept{ std::cout << (*this)[ key ]; }
   /* ______________________________ ITERATORS ______________________________ */
   class Iterator;
   class ConstIterator;
@@ -105,32 +109,32 @@ public: // ************************* PUBLIC *************************
    * Returns an iterator (i.e. generalized pointer) to the first node of the
    * tree, that is the node with the lowest key value.
    */
-  Iterator begin() const{ return Iterator(this->_first); }
+  Iterator begin() const noexcept{ return Iterator(this->_first); }
   /**
    * Returns an iterator (i.e. generalized pointer) to the last node of the
    * tree, that is the node with the highest key value.
    */
-  Iterator last() const{ return Iterator(this->_last); }
+  Iterator last() const noexcept{ return Iterator(this->_last); }
   /**
    * Returns an null iterator (i.e. generalized pointer) in order to determine
    * out of bound access to the tree.
    */
-  Iterator end() const{ return Iterator{nullptr}; }
+  Iterator end() const noexcept{ return Iterator{nullptr}; }
   /**
    * Returns a constant iterator (i.e. generalized pointer) to the first node
    * of the tree, that is the node with the lowest key value.
    */
-  ConstIterator cbegin() const { return ConstIterator{(this->begin()).get()}; }
+  ConstIterator cbegin() const noexcept{ return ConstIterator{(this->begin()).get()}; }
   /**
    * Returns a constant iterator (i.e. generalized pointer) to the last node
    * of the tree, that is the node with the lowest key value.
    */
-  ConstIterator clast() const { return ConstIterator{(this->last()).get()}; }
+  ConstIterator clast() const noexcept{ return ConstIterator{(this->last()).get()}; }
   /**
    * Returns a null iterator (i.e. generalized pointer) in order to determine
    * out of bound access to the tree.
    */
-  ConstIterator cend() const { return ConstIterator{nullptr}; }
+  ConstIterator cend() const noexcept{ return ConstIterator{nullptr}; }
   /* ______________________________ INSERT ______________________________ */
   /**
    * Adds a new node to the tree with value \p val and key \p key via a
@@ -145,7 +149,11 @@ public: // ************************* PUBLIC *************************
    * Returns an iterator to the node with key \p key.
    * If the node does not exist it returns \p nullptr.
    */
-  Iterator find(const K key) { return Iterator{find_uptr(key,root)}; }
+  Iterator find(const K key) noexcept { return Iterator{find_uptr(key,root)}; }
+  /**
+   * \p const version of the \p find member function.
+   */
+  ConstIterator find(const K key) const noexcept { return ConstIterator{find_uptr(key,root)}; }
   /**
    * Returns the value of the node with key \p key.
    * If the node does not exist it insert a new node with default value.
@@ -153,9 +161,10 @@ public: // ************************* PUBLIC *************************
   V & operator[] ( const K & key );
   /**
    * \p const version of the above.
-   * If the node does not exist it returns the default value.
+   * If the node does not exist it throws an exception.
    */
-  const V & operator[]( const K & key ) const noexcept ;
+  const V & operator[]( const K & key ) const;
+
   /* ______________________________ MODIFY ______________________________ */
   /**
    * Left rotation of the tree centered on the node with key \p key (A).
@@ -181,19 +190,19 @@ public: // ************************* PUBLIC *************************
    *      t1
    * @endcode
    */
-  void rotate_left( const K key );
+  void rotate_left( const K key ) noexcept ;
   /**
    * Balance the tree structure.
    */
-  void balance();
+  void balance() noexcept;
 
  private: // ************************* PRIVATE *************************
   /* ______________________________ PRINT ______________________________ */
   /** Recursive function used to implement naive print.*/
-  void naive_print( const std::unique_ptr<Node> & ptr) const;
+  void naive_print( const std::unique_ptr<Node> & ptr) const noexcept;
 
   /** Recursive function used to implement the graph print.*/
-  void graph_print( const std::unique_ptr<Node> & ptr, std::string & s) const;
+  void graph_print( const std::unique_ptr<Node> & ptr, std::string & s) const noexcept;
   /* ______________________________ INSERT ______________________________ */
   /** Recursive function used to implement insertion.*/
   Iterator
@@ -203,14 +212,17 @@ public: // ************************* PUBLIC *************************
    * If it is not found inside the tree it returns the pointer that would point
    * to it if it would be insered.*/
   std::unique_ptr<Node> &
-  find_uptr (const K key, std::unique_ptr<Node> & ptr) const;
+  find_uptr (const K key, std::unique_ptr<Node> & ptr) noexcept;
+  /** \p const version of the above */
+  const std::unique_ptr<Node> &
+  find_uptr (const K key, const std::unique_ptr<Node> & ptr) const noexcept;
   /* ______________________________ MODIFY ______________________________ */
   /** Left rotation.*/
-  void rotate_left( std::unique_ptr<Node> * & ptr );
+  void rotate_left( std::unique_ptr<Node> * & ptr ) noexcept;
   /** Release all the unique pointers of the sub-tree having \p ptr as root.*/
-  void release_subtree( std::unique_ptr<Node> & ptr );
+  void release_subtree( std::unique_ptr<Node> & ptr ) noexcept;
   /** Recursive function used to balance the tree.*/
-  void balance( std::unique_ptr<Node> & ptr, Node * first, int N );
+  void balance( std::unique_ptr<Node> & ptr, Node * first, int N ) noexcept;
 
   void copy(Node *ptr);
 };
@@ -245,7 +257,7 @@ void Tree<K,V,OP>::erase(const K key) noexcept {
  }
 /* ______________________________ PRINT ______________________________ */
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::print() const {
+void Tree<K,V,OP>::print() const noexcept {
   for (auto& it : *this ) {
     std::cout << it << " ";
   }
@@ -253,7 +265,7 @@ void Tree<K,V,OP>::print() const {
 }
 
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::naive_print() const {
+void Tree<K,V,OP>::naive_print() const noexcept {
   if( root==nullptr )
     std::cout << "The tree is empty." << std::endl;
   else
@@ -261,7 +273,7 @@ void Tree<K,V,OP>::naive_print() const {
  }
 
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::naive_print( const std::unique_ptr<Node> & ptr) const {
+void Tree<K,V,OP>::naive_print( const std::unique_ptr<Node> & ptr) const noexcept {
   if( ptr==nullptr )
     return;
   naive_print(ptr->left);
@@ -270,7 +282,7 @@ void Tree<K,V,OP>::naive_print( const std::unique_ptr<Node> & ptr) const {
 }
 
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::graph_print() const {
+void Tree<K,V,OP>::graph_print() const noexcept {
   std::string s;
   std::cout << "\n*\n";
   graph_print(root, s);
@@ -279,7 +291,7 @@ void Tree<K,V,OP>::graph_print() const {
 
 template < typename K, typename V, typename OP>
 void Tree<K,V,OP>::graph_print(
-const std::unique_ptr<Node> & ptr, std::string & s) const {
+const std::unique_ptr<Node> & ptr, std::string & s) const noexcept {
   if (ptr->right != nullptr ){
     std::cout.fill('-');
     std::cout.width(8);
@@ -301,8 +313,8 @@ const std::unique_ptr<Node> & ptr, std::string & s) const {
 
 /* ______________________________ INSERT ______________________________ */
 template < typename K, typename V, typename OP>
-typename Tree<K,V,OP>::Iterator Tree<K,V,OP>::insert(
-const K & key, const V & val, std::unique_ptr<Node> & ptr, Node * n){
+typename Tree<K,V,OP>::Iterator
+Tree<K,V,OP>::insert(const K & key, const V & val, std::unique_ptr<Node> & ptr, Node * n){
   if (ptr == nullptr ){
     ptr.reset(new Node(key, val, n));
     ++_len;
@@ -342,8 +354,22 @@ const K & key, const V & val, std::unique_ptr<Node> & ptr, Node * n){
 
 /* ______________________________ NAVIGATE ______________________________ */
 template < typename K, typename V, typename OP>
+const std::unique_ptr<typename Tree<K,V,OP>::Node> &
+Tree<K,V,OP>::find_uptr(const K key, const std::unique_ptr<Node> & ptr) const noexcept {
+  if ( ptr == nullptr )
+    return ptr;
+  if (ptr->_pair.first == key )
+    return ptr;
+  if(  c_op(key, ptr->_pair.first) )
+   return find_uptr(key,ptr->left);
+  if( c_op( ptr->_pair.first, key) )
+    return find_uptr(key,ptr->right);
+  return ptr;
+}
+
+template < typename K, typename V, typename OP>
 std::unique_ptr<typename Tree<K,V,OP>::Node> &
-Tree<K,V,OP>::find_uptr(const K key, std::unique_ptr<Node> & ptr) const {
+Tree<K,V,OP>::find_uptr(const K key, std::unique_ptr<Node> & ptr) noexcept {
   if ( ptr == nullptr )
     return ptr;
   if (ptr->_pair.first == key )
@@ -367,24 +393,23 @@ V & Tree<K,V,OP>::operator[] ( const K & key ) {
 }
 
 template < typename K, typename V, typename OP>
-const V & Tree<K,V,OP>::operator[]( const K & key ) const noexcept {
+const V & Tree<K,V,OP>::operator[]( const K & key ) const {
   Iterator it = find(key);
-  // PBM.LC: if we want find to return out-of-range error, the following if statement should be deleted. I think giving error back makes more sense.
   if ( it.get() == nullptr ){
     t_error("Cannot find key ",key);
   }
-  return (*this)[ key ];
+  return (*it).second;
 }
 
 /* ______________________________ MODIFY ______________________________ */
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::balance(){
+void Tree<K,V,OP>::balance() noexcept {
   release_subtree(root);
   balance( root, _first, _len);
 }
 
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::balance( std::unique_ptr<Node> & ptr, Node * first, int N ){
+void Tree<K,V,OP>::balance( std::unique_ptr<Node> & ptr, Node * first, int N ) noexcept {
   if ( N <= 0 )
     return;
   Node * tmp = first;
@@ -397,7 +422,7 @@ void Tree<K,V,OP>::balance( std::unique_ptr<Node> & ptr, Node * first, int N ){
 }
 
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::release_subtree( std::unique_ptr<Node> & ptr ){
+void Tree<K,V,OP>::release_subtree( std::unique_ptr<Node> & ptr ) noexcept {
   if ( ptr == nullptr )
     return;
   release_subtree( ptr->left );
@@ -406,14 +431,14 @@ void Tree<K,V,OP>::release_subtree( std::unique_ptr<Node> & ptr ){
 }
 
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::rotate_left( const K key ) {
+void Tree<K,V,OP>::rotate_left( const K key ) noexcept {
   std::unique_ptr<Node> * ptr{ &find_uptr( key, root ) };
   if ( ptr != nullptr )
    rotate_left( ptr );
 }
 
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::rotate_left( std::unique_ptr<Node> * & ptr ){
+void Tree<K,V,OP>::rotate_left( std::unique_ptr<Node> * & ptr ) noexcept {
   if ( (*ptr)->right == nullptr )
     return;
   Node * tmp = (*ptr).release(); // 1.
@@ -442,22 +467,22 @@ public:
   /**
    * Prints the key and the value of the node.
    */
-  void print() const;
+  void print() const noexcept;
   /**
    * Prints key, value, children's keys, next and prev keys of a node.
    */
-  void full_print() const;
+  void full_print() const noexcept;
 private:
-  void cond_print (Node * ptr) const;
+  void cond_print (Node * ptr) const noexcept;
 };
 
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::Node::print() const {
+void Tree<K,V,OP>::Node::print() const noexcept{
   std::cout << _pair;
 }
 
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::Node::full_print() const {
+void Tree<K,V,OP>::Node::full_print() const noexcept{
   std::cout << "key: " << _pair.first << "\tvalue: " <<  _pair.second
   << "\tleft son: ";
   cond_print(left.get());
@@ -471,7 +496,7 @@ void Tree<K,V,OP>::Node::full_print() const {
 }
 
 template < typename K, typename V, typename OP>
-void Tree<K,V,OP>::Node::cond_print (Node * ptr) const{
+void Tree<K,V,OP>::Node::cond_print (Node * ptr) const noexcept{
   std::cout.width(6);
   std::cout.fill(' ');
   if ( ptr != nullptr )
@@ -491,17 +516,25 @@ public:
   Iterator(const std::unique_ptr<Node> &n) : current{n.get()} {}
   Iterator( Node *n): current{n} {}
   /**
-   * Returns the key associated to node pointed by the current iterator.
-   */
-  std::pair<const K,V>& operator*() const { return current->_pair; }
-  /**
    * Returns a raw pointer to the node pointed by the current iterator.
    */
-  Node * get() const { return current; }
+  Node * get() const noexcept { return current; }
+  /**
+   * Returns the key associated to node pointed by the current iterator.
+   */
+  std::pair<const K,V>& operator*() const {
+    if ( current == nullptr ){
+      t_error("Out of bound access!");
+    }
+    return current->_pair;
+  }
   /**
    * Pre-increment operator: moves the iterator to the next element.
    */
   Iterator& operator++() {
+    if ( current == nullptr ){
+      t_error("Out of bound access!");
+    }
     current = current->_next;
     return *this;
   };
@@ -518,6 +551,9 @@ public:
    * Pre-decrement operator: moves the iterator to the previous element.
    */
   Iterator& operator--() {
+    if ( current == nullptr ){
+      t_error("Out of bound access!");
+    }
     current = current->_prev;
     return *this;
   };
@@ -533,13 +569,13 @@ public:
   /**
    * Returns true if two iterators point to the same node, false else.
    */
-  bool operator==(const Iterator& other) {
+  bool operator==(const Iterator& other) const noexcept {
     return this->current == other.current;
   }
   /**
    * Returns false if two iterators point to the same node, true else.
    */
-  bool operator!=(const Iterator& other) { return !(*this == other); }
+  bool operator!=(const Iterator& other) const noexcept { return !(*this == other); }
 };
 /* ____________________________ CONSTITERATORS ____________________________ */
 template < typename K, typename V, typename OP>
@@ -547,7 +583,7 @@ class Tree<K,V,OP>::ConstIterator : public Tree<K,V,OP>::Iterator {
   using parent = Tree<K,V,OP>::Iterator;
  public:
   using parent::Iterator;
-  const V& operator*() const { return parent::operator*(); }
+  const std::pair<const K,V>& operator*() const { return parent::operator*(); }
 };
 /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ITERATOR ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
 #endif

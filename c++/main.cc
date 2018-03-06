@@ -12,7 +12,7 @@
 #define SEED time(NULL)
 #endif
 
-#define MAX_SIZE 20000
+#define MAX_SIZE 1025
 #define STEP 5000
 #define NLOOK 100000
 
@@ -36,7 +36,8 @@ int main(){
   double t_start, t_stop, t_1;
   std::vector<int> keys;
   size_t size, i, j;
-  Tree<int, int, comp<int> > BT{}, T;
+  Tree<int, int, comp<int> > BT{};
+
   int tmp, sum = 0, check = 0;
   srand (SEED);
   std::cout << "#NLOOK: " << NLOOK << "\n#size:\tbefore:\tafter:\t(sec)\n";
@@ -85,6 +86,11 @@ int main(){
       std::cout << "\tOK\n";
     else
       std::cout << "\tERROR\n";
+
+
+    Tree<int, int, comp<int> > BT2{BT};
+    BT2.print_value(1023);
+    BT2.clean();
     BT.clean();
   }
 

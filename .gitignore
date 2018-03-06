@@ -1,9 +1,8 @@
 *.x
 *.o
 .gitignore
-Makefile
 c++/html/*
 c++/latex/*
 .DS*
+*.dSYM
 a.out
-

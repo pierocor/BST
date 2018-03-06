@@ -1,12 +1,13 @@
 EXE = exe.x
 CXX = g++
-CFLAGS = -I include -g -std=c++11 -Wall -Wextra -DSEED=0 -O3
+CFLAGS = -I include/ -g -std=c++11 -Wall -Wextra -DSEED=0 -O3
 
-SRC= main.cc src/tree.cc
-OBJ=$(SRC:.cc=.o)
-INC = $(wildcard *.h)
+SRC= main.cc
 
 all: $(EXE)
+
+gnu:
+	$(CXX) $(SRC) $(CFLAGS) -o $(EXE) -DGNU
 
 clean:
 	$(info clean up)
@@ -14,15 +15,9 @@ clean:
 
 .PHONY: clean
 
-%.o: %.cc
-	$(CXX) -c $< -o $@ $(CFLAGS)
+$(EXE):
+	$(CXX) $(SRC) $(CFLAGS) -o $(EXE)
 
-$(EXE): $(OBJ)
-	$(CXX) $^ -o $(EXE)
-
-
-
-main.o: include/tree.h
 
 format: $(SRC) $(INC)
 	@clang-format -i $^ 2>/dev/null || echo "Please install clang-format to run this commands"
