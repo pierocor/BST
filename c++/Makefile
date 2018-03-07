@@ -15,7 +15,7 @@ clean:
 
 .PHONY: clean
 
-$(EXE):
+$(EXE): $(SRC) $(INC)
 	$(CXX) $(SRC) $(CFLAGS) -o $(EXE)
 
 

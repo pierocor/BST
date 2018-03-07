@@ -144,6 +144,14 @@ public: // ************************* PUBLIC *************************
   Iterator insert(const K & key, const V & val){
      return insert(key, val, root, nullptr);
   }
+  /**
+   * Adds a new node to the tree with pair key value \p pair.
+   * If the key is already present in the tree it updates
+   * the value of the corersponding node.
+   */
+  Iterator insert(const std::pair<K, V> & pair){
+     return insert(pair.first, pair.second, root, nullptr);
+  }
   /* ______________________________ NAVIGATE ______________________________ */
   /**
    * Returns an iterator to the node with key \p key.
