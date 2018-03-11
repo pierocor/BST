@@ -86,10 +86,9 @@ class PostcardList(object):
 
     def parsePostcards(self):        
         for line in self._postcards:
-            self._postcards.append(line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split())
-            self._date.append(self._postcards[-1][0])
-            self._from.append(self._postcards[-1][1])
-            self._to.append(self._postcards[-1][2])
+            self._date.append(line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split()[0])
+            self._from.append(line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split()[1])
+            self._to.append(line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split()[2])
 
             
     ########################
@@ -179,11 +178,11 @@ class Test(unittest.TestCase):
 
 if __name__ == '__main__':
 
-#    prova=PostcardList('exam_postcard_list0.txt')
-#    print prova._file
+#    prova=PostcardList()
+#    prova.readFile('exam_postcard_list0.txt')
 #    prova.parsePostcards()
 #    print prova._postcards
 #    print prova._date
 #    print prova._from
 #    print prova._to
-    unittest.main()
+    #unittest.main()
