@@ -84,6 +84,14 @@ class PostcardList(object):
     #             sublist.append(p)
     #     return sublist
 
+    def parsePostcards(self):        
+        for line in self._postcards:
+            self._postcards.append(line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split())
+            self._date.append(self._postcards[-1][0])
+            self._from.append(self._postcards[-1][1])
+            self._to.append(self._postcards[-1][2])
+
+            
     ########################
     # define attributes here
     # pass
@@ -170,10 +178,12 @@ class Test(unittest.TestCase):
         self.assertListEqual(srw_test[203],[6, 9, 11, 12, 24, 31, 42])
 
 if __name__ == '__main__':
-    # p = PostcardList()
-    # p.readFile("./exam_postcard_list1.txt")
-    # print(p.getNumberOfPostcards())
-    # p.updateLists("./exam_postcard_list2.txt")
-    # print(p.getNumberOfPostcards())
-    # print(p._postcards)
+
+#    prova=PostcardList('exam_postcard_list0.txt')
+#    print prova._file
+#    prova.parsePostcards()
+#    print prova._postcards
+#    print prova._date
+#    print prova._from
+#    print prova._to
     unittest.main()
