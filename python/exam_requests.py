@@ -47,7 +47,42 @@ class PostcardList(object):
     def __del__(self):
         print("\ndelete PostcardList\n")
     def __str__(self): # automatically called by print
-        print(self._file)
+        return self._file
+
+    def readFile(self, filename):
+        self._file = filename
+        f = open(filename, 'r')
+        self._postcards = f.readlines()
+        f.close()
+
+    def writeFile(self, filename):
+        self._file = filename
+        f = open(filename, 'w')
+        f.writelines(self._postcards)
+        f.close()
+
+    def updateFile(self, filename):
+        self._file = filename
+        f = open(filename, 'a')
+        f.writelines(self._postcards)
+        f.close()
+
+    def updateLists(self, filename):
+        self._file = filename
+        f = open(filename, 'r')
+        self._postcards.extend(f.readlines())
+        f.close()
+
+    def getNumberOfPostcards(self):
+        return len(self._postcards)
+
+    # def getPostcardsByDateRange(self,date_range):
+    #     sublist= []
+    #     for p in self._postcards:
+    #         date = datetime.datetime.strptime(p[0], "%Y-%m-%d")
+    #         if date > date_range[0] and date < date_range[1]:
+    #             sublist.append(p)
+    #     return sublist
 
     def parsePostcards(self):        
         for line in self._postcards:
