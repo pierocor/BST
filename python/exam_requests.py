@@ -73,6 +73,16 @@ class PostcardList(object):
         self._postcards.extend(f.readlines())
         f.close()
 
+    def getNumberOfPostcards(self):
+        return len(self._postcards)
+
+    # def getPostcardsByDateRange(self,date_range):
+    #     sublist= []
+    #     for p in self._postcards:
+    #         date = datetime.datetime.strptime(p[0], "%Y-%m-%d")
+    #         if date > date_range[0] and date < date_range[1]:
+    #             sublist.append(p)
+    #     return sublist
 
     ########################
     # define attributes here
@@ -160,10 +170,10 @@ class Test(unittest.TestCase):
         self.assertListEqual(srw_test[203],[6, 9, 11, 12, 24, 31, 42])
 
 if __name__ == '__main__':
-    p = PostcardList()
-    p.readFile("./exam_postcard_list1.txt")
-    print(p)
-    p.updateLists("./exam_postcard_list2.txt")
-    print(p)
-    print(p._postcards)
-    #unittest.main()
+    # p = PostcardList()
+    # p.readFile("./exam_postcard_list1.txt")
+    # print(p.getNumberOfPostcards())
+    # p.updateLists("./exam_postcard_list2.txt")
+    # print(p.getNumberOfPostcards())
+    # print(p._postcards)
+    unittest.main()
