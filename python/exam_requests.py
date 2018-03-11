@@ -47,7 +47,32 @@ class PostcardList(object):
     def __del__(self):
         print("\ndelete PostcardList\n")
     def __str__(self): # automatically called by print
-        print(self._file)
+        return self._file
+
+    def readFile(self, filename):
+        self._file = filename
+        f = open(filename, 'r')
+        self._postcards = f.readlines()
+        f.close()
+
+    def writeFile(self, filename):
+        self._file = filename
+        f = open(filename, 'w')
+        f.writelines(self._postcards)
+        f.close()
+
+    def updateFile(self, filename):
+        self._file = filename
+        f = open(filename, 'a')
+        f.writelines(self._postcards)
+        f.close()
+
+    def updateLists(self, filename):
+        self._file = filename
+        f = open(filename, 'r')
+        self._postcards.extend(f.readlines())
+        f.close()
+
 
     ########################
     # define attributes here
@@ -135,5 +160,10 @@ class Test(unittest.TestCase):
         self.assertListEqual(srw_test[203],[6, 9, 11, 12, 24, 31, 42])
 
 if __name__ == '__main__':
-
-    unittest.main()
+    p = PostcardList()
+    p.readFile("./exam_postcard_list1.txt")
+    print(p)
+    p.updateLists("./exam_postcard_list2.txt")
+    print(p)
+    print(p._postcards)
+    #unittest.main()
