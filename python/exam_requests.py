@@ -53,6 +53,7 @@ class PostcardList(object):
         self._file = filename
         f = open(filename, 'r')
         self._postcards = f.readlines()
+        self.parsePostcards()
         f.close()
 
     def writeFile(self, filename):
@@ -84,13 +85,13 @@ class PostcardList(object):
     #             sublist.append(p)
     #     return sublist
 
-    def parsePostcards(self):        
+    def parsePostcards(self):
         for line in self._postcards:
             self._date.append(line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split()[0])
             self._from.append(line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split()[1])
             self._to.append(line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split()[2])
 
-            
+
     ########################
     # define attributes here
     # pass
