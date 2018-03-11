@@ -40,9 +40,9 @@ class PostcardList(object):
     def __init__(self):
         self._file = []
         self._postcards = []
-        self._date = []
-        self._from = []
-        self._to = []
+        self._date = {}
+        self._from = {}
+        self._to = {}
         print("\nPostcard list created\n")
     def __del__(self):
         print("\ndelete PostcardList\n")
@@ -86,10 +86,13 @@ class PostcardList(object):
     #     return sublist
 
     def parsePostcards(self):
+        i=0
         for line in self._postcards:
-            self._date.append(line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split()[0])
-            self._from.append(line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split()[1])
-            self._to.append(line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split()[2])
+            clean_postcard = line.replace(';','').replace('date:','').replace('from:','').replace('to:','').split()
+            self._date.setdefault(clean_postcard[0], []).append(i)
+            self._from.setdefault(clean_postcard[1],[]).append(i)
+            self._to.setdefault(clean_postcard[2],[]).append(i)
+            i=i+1
 
 
     ########################
@@ -179,11 +182,9 @@ class Test(unittest.TestCase):
 
 if __name__ == '__main__':
 
-#    prova=PostcardList()
-#    prova.readFile('exam_postcard_list0.txt')
-#    prova.parsePostcards()
-#    print prova._postcards
-#    print prova._date
-#    print prova._from
-#    print prova._to
-    #unittest.main()
+    p = PostcardList()
+    p.readFile("./exam_postcard_list1.txt")
+    print(p)
+    print(p._postcards)
+    print(p._date, type(p._date))
+    print(p._to, type(p._to))
