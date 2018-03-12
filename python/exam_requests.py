@@ -112,12 +112,6 @@ class PostcardList(object):
     def populatePostcards(self):
         return 
 
-########################
-# TO COMMENT
-# from exam_solution import PostcardList # overrides the class define above
-########################
-
-
 class Test(unittest.TestCase):
 
     @classmethod
@@ -193,14 +187,3 @@ class Test(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-#    p = PostcardList()
-#    #p.readFile("./exam_postcard_list1.txt")
-#    #print(p)
-#    #print(p._postcards)
-#    #print(p._date, type(p._date))
-#    #print(p._to, type(p._to))
-#    
-#    
-#    print p._from
-#    print p.getPostcardsBySender('$crooge')
-#    print p.getPostcardsByReceiver('Huey')
